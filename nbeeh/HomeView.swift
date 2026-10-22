@@ -112,9 +112,6 @@ struct HomeView: View {
                       
                         
                         VStack(alignment: .trailing, spacing: 4) {
-                            Text("تحدي اليوم")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(Color("textsmalldark"))
                             
                             Image(systemName: "figure.walk")
                                 .font(.system(size: 20))
