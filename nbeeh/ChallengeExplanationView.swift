@@ -74,7 +74,7 @@ struct ChallengeExplanationView: View {
                 }
                 .padding(24)
                 .background(Color("box"))
-                .cornerRadius(24)
+                .cornerRadius(50)
                 .padding(.horizontal, 40)
                 
                 // النص الفرعي أسفل المربع
