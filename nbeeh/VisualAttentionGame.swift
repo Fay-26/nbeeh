@@ -122,7 +122,7 @@ struct VisualAttentionGame: View {
 
                         LazyVGrid(
                             columns: columns,
-                            spacing: 14
+                            spacing: 50
                         ) {
 
                             ForEach(boardTiles) { tile in
@@ -159,7 +159,6 @@ struct VisualAttentionGame: View {
         }
     }
 
-    // MARK: Start a New Session
 
     private func startSession() {
 
@@ -176,27 +175,17 @@ struct VisualAttentionGame: View {
         generateChallenge()
     }
 
-    // MARK: Generate a Random Challenge
 
+    
     private func generateChallenge() {
-
-        // Choose the one shape that will appear only once.
         targetShape = GameShape.allCases.randomElement() ?? .triangle
 
         let distractors = GameShape.allCases
             .filter { $0 != targetShape }
             .shuffled()
 
-        // Higher difficulty allows more repeated shapes.
-        let maxCount = min(5 + difficultyLevel, 11)
-
-        // Sometimes use one repeated shape type,
-        // sometimes use two.
-        let distractorTypeCount = Int.random(in: 1...2)
-
         var newTiles: [GameTile] = []
 
-        // The unique target appears exactly once.
         newTiles.append(
             GameTile(
                 shape: targetShape,
@@ -204,45 +193,55 @@ struct VisualAttentionGame: View {
             )
         )
 
-        for shape in distractors.prefix(distractorTypeCount) {
+        let distractorTypeCount = Int.random(in: 1...2)
 
-            let count: Int
+        if distractorTypeCount == 1 {
+            let shape = distractors[0]
+            let color = Int.random(in: 0...1)
 
-            if distractorTypeCount == 1 {
-
-                // Example: many circles and one triangle.
-                let upperLimit = min(
-                    14 + difficultyLevel * 2,
-                    23
-                )
-
-                count = Int.random(in: 8...upperLimit)
-
-            } else {
-
-                // Both distractor shapes appear multiple times.
-                count = Int.random(in: 3...maxCount)
-            }
-
-            for _ in 0..<count {
-
+            for _ in 0..<14 {
                 newTiles.append(
                     GameTile(
                         shape: shape,
-                        colorIndex: Int.random(in: 0...1)
+                        colorIndex: color
+                    )
+                )
+            }
+        } else {
+            let firstShape = distractors[0]
+            let secondShape = distractors[1]
+
+            let firstCount = Int.random(in: 5...9)
+            let secondCount = 14 - firstCount
+
+            let firstColor = Int.random(in: 0...1)
+            let secondColor = Int.random(in: 0...1)
+
+            for _ in 0..<firstCount {
+                newTiles.append(
+                    GameTile(
+                        shape: firstShape,
+                        colorIndex: firstColor
+                    )
+                )
+            }
+
+            for _ in 0..<secondCount {
+                newTiles.append(
+                    GameTile(
+                        shape: secondShape,
+                        colorIndex: secondColor
                     )
                 )
             }
         }
 
-        // Randomize positions and colors.
         boardTiles = newTiles.shuffled()
 
-        // Start hidden reaction-time measurement.
         roundStart = Date()
     }
 
-    // MARK: Process a Tap
+
 
     private func selectShape(_ tile: GameTile) {
 
@@ -253,7 +252,6 @@ struct VisualAttentionGame: View {
 
         if tile.shape == targetShape {
 
-            // Correct answer
             correctAnswers += 1
             consecutiveErrors = 0
 
@@ -263,8 +261,6 @@ struct VisualAttentionGame: View {
                 fastCorrectStreak = 0
             }
 
-            // Two consecutive fast correct answers
-            // increase the difficulty.
             if fastCorrectStreak >= 2 {
                 difficultyLevel = min(difficultyLevel + 1, 8)
                 fastCorrectStreak = 0
@@ -272,19 +268,16 @@ struct VisualAttentionGame: View {
 
         } else {
 
-            // Incorrect answer
             totalErrors += 1
             consecutiveErrors += 1
             fastCorrectStreak = 0
 
-            // Two consecutive errors reduce difficulty.
             if consecutiveErrors >= 2 {
                 difficultyLevel = max(difficultyLevel - 1, 0)
                 consecutiveErrors = 0
             }
         }
 
-        // Every tap ends the current round.
         if roundNumber < 5 {
 
             roundNumber += 1
@@ -292,7 +285,6 @@ struct VisualAttentionGame: View {
 
         } else {
 
-            // No results page is opened here.
             isFinished = true
 
             print("Session completed")
@@ -304,7 +296,6 @@ struct VisualAttentionGame: View {
     }
 }
 
-// MARK: - Shape Drawing
 
 private struct ShapeView: View {
 
@@ -351,7 +342,6 @@ private struct ShapeView: View {
     }
 }
 
-// MARK: - Triangle
 
 private struct Triangle: Shape {
 

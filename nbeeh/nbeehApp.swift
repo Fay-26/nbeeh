@@ -13,5 +13,10 @@ struct nbeehApp: App {
         WindowGroup {
             LandingView()
         }
+        WindowGroup {
+            NavigationStack {
+                VisualAttentionGame()
+            }
+        }
     }
 }
