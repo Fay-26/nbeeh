@@ -85,7 +85,7 @@ struct ChallengeResultsView: View {
                     .padding(.top, 20)
                     .frame(
                         maxWidth: .infinity,
-                        maxHeight: geometry.size.height * 0.47,
+                        maxHeight: geometry.size.height * 0.50,
                         alignment: .topTrailing
                     )
                     .background(Color("box"))
@@ -107,7 +107,7 @@ struct ChallengeResultsView: View {
 
     private func resultSymbol(_ success: Bool) -> some View {
         Image(systemName: success ? "checkmark.circle" : "minus.circle")
-            .font(.system(size: 39, weight: .medium))
+            .font(.system(size: 33, weight: .medium))
             .foregroundStyle(Color("mainBG"))
             .frame(maxWidth: .infinity)
     }
