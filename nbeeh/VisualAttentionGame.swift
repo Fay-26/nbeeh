@@ -5,131 +5,74 @@
 //  Created by Monerah Almousa on 11/05/1448 AH.
 //
 
+
 import SwiftUI
 
-enum GameShape {
+// MARK: - Shape Types
+
+private enum GameShape: CaseIterable {
     case circle
     case triangle
     case square
 }
 
-struct GameTile: Identifiable {
+// MARK: - Game Tile
+
+private struct GameTile: Identifiable {
     let id = UUID()
     let shape: GameShape
-    let isDifferentColor: Bool
+    let colorIndex: Int
 }
 
-
-struct GameStage {
-    let circles: Int
-    let triangles: Int
-    let squares: Int
-    let highlightedTriangles: Int
-    let highlightedSquares: Int
-    let requiredTaps: Int
-
-    var tiles: [GameTile] {
-        var result: [GameTile] = []
-
-        for _ in 0..<circles {
-            result.append(
-                GameTile(
-                    shape: .circle,
-                    isDifferentColor: false
-                )
-            )
-        }
-
-        for index in 0..<triangles {
-            result.append(
-                GameTile(
-                    shape: .triangle,
-                    isDifferentColor: index < highlightedTriangles
-                )
-            )
-        }
-
-        for index in 0..<squares {
-            result.append(
-                GameTile(
-                    shape: .square,
-                    isDifferentColor: index < highlightedSquares
-                )
-            )
-        }
-
-        return result
-    }
-}
-
+// MARK: - Main Game
 
 struct VisualAttentionGame: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    private let stages: [GameStage] = [
-        GameStage(
-            circles: 14, triangles: 1, squares: 0,
-            highlightedTriangles: 1, highlightedSquares: 0,
-            requiredTaps: 1
-        ),
-        GameStage(
-            circles: 13, triangles: 1, squares: 1,
-            highlightedTriangles: 1, highlightedSquares: 1,
-            requiredTaps: 2
-        ),
-        GameStage(
-            circles: 11, triangles: 2, squares: 2,
-            highlightedTriangles: 1, highlightedSquares: 1,
-            requiredTaps: 4
-        ),
-        GameStage(
-            circles: 10, triangles: 3, squares: 2,
-            highlightedTriangles: 0, highlightedSquares: 0,
-            requiredTaps: 5
-        ),
-        GameStage(
-            circles: 9, triangles: 3, squares: 3,
-            highlightedTriangles: 0, highlightedSquares: 0,
-            requiredTaps: 6
-        )
-    ]
+    // Difficulty is saved between sessions
+    @AppStorage("visualAttentionDifficulty")
+    private var difficultyLevel = 0
 
-    @State private var stageIndex = 0
-    @State private var boardShapes: [GameTile] = []
-
-    @State private var tapsInStage = 0
-    @State private var errorsInStage = 0
-    @State private var totalErrors = 0
-    @State private var stageStart = Date()
-    @State private var reactionTimes: [Double] = []
+    // Five rounds per session
+    @State private var roundNumber = 1
+    @State private var boardTiles: [GameTile] = []
+    @State private var targetShape: GameShape = .triangle
     @State private var isFinished = false
+
+    // Hidden performance tracking
+    @State private var roundStart = Date()
+    @State private var reactionTimes: [Double] = []
+    @State private var correctAnswers = 0
+    @State private var totalErrors = 0
+
+    // Adaptive difficulty
+    @State private var fastCorrectStreak = 0
+    @State private var consecutiveErrors = 0
 
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: 12),
         count: 3
     )
 
-    private var currentStage: GameStage {
-        stages[stageIndex]
-    }
-
     var body: some View {
+
         ZStack {
-            Color("taskBG")
+            Color("mainBG")
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
 
+                // MARK: Header
+
                 HStack {
+
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .font(
-                                .system(size: 30, weight: .semibold)
-                            )
-                            .foregroundStyle(Color("taskBG"))
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundStyle(Color("mainBG"))
                             .frame(width: 48, height: 48)
                             .background(
                                 Color("box"),
@@ -140,10 +83,8 @@ struct VisualAttentionGame: View {
 
                     Spacer()
 
-                    Text("تحدي الإنتباه البصري")
-                        .font(
-                            .system(size: 20, weight: .semibold)
-                        )
+                    Text("تحدي الانتباه البصري")
+                        .font(.system(size: 20, weight: .semibold))
                         .foregroundStyle(Color("mainBG"))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -155,123 +96,235 @@ struct VisualAttentionGame: View {
                     Spacer()
 
                     Image(systemName: "eye")
-                        .font(
-                            .system(size: 30, weight: .semibold)
-                        )
+                        .font(.system(size: 30, weight: .semibold))
                         .foregroundStyle(Color("box"))
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 12)
+                .padding(.top, 16)
 
                 Spacer(minLength: 18)
 
-                LazyVGrid(columns: columns, spacing: 38) {
-                    ForEach(boardShapes) { tile in
-                        Button {
-                            selectShape(tile)
-                        } label: {
-                            ShapeView(tile: tile)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 68)
-                                .contentShape(Rectangle())
+                // MARK: Game Board
+
+                ZStack {
+
+                    Color.white
+
+                    if isFinished {
+
+                        Text("انتهت الجولات الخمس!")
+                            .font(.system(size: 25, weight: .semibold))
+                            .foregroundStyle(Color("mainBG"))
+                            .multilineTextAlignment(.center)
+                            .padding()
+
+                    } else {
+
+                        LazyVGrid(
+                            columns: columns,
+                            spacing: 50
+                        ) {
+
+                            ForEach(boardTiles) { tile in
+
+                                Button {
+                                    selectShape(tile)
+                                } label: {
+
+                                    ShapeView(tile: tile)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 42)
+                                        .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
-                        .buttonStyle(.plain)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 22)
                     }
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 28)
                 .frame(maxWidth: .infinity)
-                .frame(height: 600)
-                .background(Color.textbig)
+                .frame(height: 520)
                 .clipShape(
                     RoundedRectangle(cornerRadius: 50)
                 )
                 .padding(.horizontal, 18)
 
-                Spacer()
+                Spacer(minLength: 18)
             }
         }
         .preferredColorScheme(.dark)
         .onAppear {
-            startStage()
+            startSession()
         }
     }
 
 
-    private func startStage() {
-        boardShapes = currentStage.tiles.shuffled()
-        tapsInStage = 0
-        errorsInStage = 0
-        stageStart = Date()
+    private func startSession() {
+
+        roundNumber = 1
+        isFinished = false
+
+        reactionTimes = []
+        correctAnswers = 0
+        totalErrors = 0
+
+        fastCorrectStreak = 0
+        consecutiveErrors = 0
+
+        generateChallenge()
     }
+
+
+    
+    private func generateChallenge() {
+        targetShape = GameShape.allCases.randomElement() ?? .triangle
+
+        let distractors = GameShape.allCases
+            .filter { $0 != targetShape }
+            .shuffled()
+
+        var newTiles: [GameTile] = []
+
+        newTiles.append(
+            GameTile(
+                shape: targetShape,
+                colorIndex: Int.random(in: 0...1)
+            )
+        )
+
+        let distractorTypeCount = Int.random(in: 1...2)
+
+        if distractorTypeCount == 1 {
+            let shape = distractors[0]
+            let color = Int.random(in: 0...1)
+
+            for _ in 0..<14 {
+                newTiles.append(
+                    GameTile(
+                        shape: shape,
+                        colorIndex: color
+                    )
+                )
+            }
+        } else {
+            let firstShape = distractors[0]
+            let secondShape = distractors[1]
+
+            let firstCount = Int.random(in: 5...9)
+            let secondCount = 14 - firstCount
+
+            let firstColor = Int.random(in: 0...1)
+            let secondColor = Int.random(in: 0...1)
+
+            for _ in 0..<firstCount {
+                newTiles.append(
+                    GameTile(
+                        shape: firstShape,
+                        colorIndex: firstColor
+                    )
+                )
+            }
+
+            for _ in 0..<secondCount {
+                newTiles.append(
+                    GameTile(
+                        shape: secondShape,
+                        colorIndex: secondColor
+                    )
+                )
+            }
+        }
+
+        boardTiles = newTiles.shuffled()
+
+        roundStart = Date()
+    }
+
 
 
     private func selectShape(_ tile: GameTile) {
+
         guard !isFinished else { return }
 
-        tapsInStage += 1
+        let elapsed = Date().timeIntervalSince(roundStart)
+        reactionTimes.append(elapsed)
 
-        if tile.shape == .circle {
-            errorsInStage += 1
+        if tile.shape == targetShape {
+
+            correctAnswers += 1
+            consecutiveErrors = 0
+
+            if elapsed <= 2.5 {
+                fastCorrectStreak += 1
+            } else {
+                fastCorrectStreak = 0
+            }
+
+            if fastCorrectStreak >= 2 {
+                difficultyLevel = min(difficultyLevel + 1, 8)
+                fastCorrectStreak = 0
+            }
+
+        } else {
+
             totalErrors += 1
+            consecutiveErrors += 1
+            fastCorrectStreak = 0
+
+            if consecutiveErrors >= 2 {
+                difficultyLevel = max(difficultyLevel - 1, 0)
+                consecutiveErrors = 0
+            }
         }
 
-        if tapsInStage >= currentStage.requiredTaps {
-            let elapsed = Date().timeIntervalSince(stageStart)
-            reactionTimes.append(elapsed)
+        if roundNumber < 5 {
 
-            if stageIndex < stages.count - 1 {
-                stageIndex += 1
-                startStage()
-            } else {
-                isFinished = true
+            roundNumber += 1
+            generateChallenge()
 
-                // No results page yet
-                print("All five stages completed")
-                print("Total errors: \(totalErrors)")
-                print("Stage times: \(reactionTimes)")
-            }
+        } else {
+
+            isFinished = true
+
+            print("Session completed")
+            print("Correct answers: \(correctAnswers)")
+            print("Total errors: \(totalErrors)")
+            print("Reaction times: \(reactionTimes)")
+            print("Saved difficulty: \(difficultyLevel)")
         }
     }
 }
 
 
-struct ShapeView: View {
+private struct ShapeView: View {
+
     let tile: GameTile
-    
+
     var body: some View {
+
         GeometryReader { geometry in
+
             let side = min(
-                geometry.size.width * 0.45,
-                geometry.size.height * 0.6
+                geometry.size.width * 0.85,
+                geometry.size.height * 0.9
             )
-            
-            
+
             Group {
+
                 switch tile.shape {
+
                 case .circle:
                     Circle()
-                        .fill(
-                            tile.isDifferentColor
-                            ? Color("mainBG")
-                            : Color("botton")
-                        )
-                    
+                        .fill(shapeColor)
+
                 case .triangle:
                     Triangle()
-                        .fill(
-                            tile.isDifferentColor
-                            ? Color("mainBG")
-                            : Color("botton")
-                        )
-                    
+                        .fill(shapeColor)
+
                 case .square:
                     Rectangle()
-                        .fill(
-                            tile.isDifferentColor
-                            ? Color("mainBG")
-                            : Color("botton")
-                        )
+                        .fill(shapeColor)
                 }
             }
             .frame(width: side, height: side)
@@ -281,32 +334,43 @@ struct ShapeView: View {
             )
         }
     }
-    struct Triangle: Shape {
-        func path(in rect: CGRect) -> Path {
-            var path = Path()
-            
-            path.move(
-                to: CGPoint(x: rect.midX, y: rect.minY)
-            )
-            
-            path.addLine(
-                to: CGPoint(x: rect.maxX, y: rect.maxY)
-            )
-            
-            path.addLine(
-                to: CGPoint(x: rect.minX, y: rect.maxY)
-            )
-            
-            path.closeSubpath()
-            
-            return path
-        }
-    }
-    
-    #Preview {
-        NavigationStack {
-            VisualAttentionGame()
-        }
+
+    private var shapeColor: Color {
+        tile.colorIndex == 0
+            ? Color("botton")
+            : Color("mainBG")
     }
 }
+
+
+private struct Triangle: Shape {
+
+    func path(in rect: CGRect) -> Path {
+
+        var path = Path()
+
+        path.move(
+            to: CGPoint(x: rect.midX, y: rect.minY)
+        )
+
+        path.addLine(
+            to: CGPoint(x: rect.maxX, y: rect.maxY)
+        )
+
+        path.addLine(
+            to: CGPoint(x: rect.minX, y: rect.maxY)
+        )
+
+        path.closeSubpath()
+
+        return path
+    }
+}
+
+#Preview {
+    NavigationStack {
+        VisualAttentionGame()
+    }
+}
+
  

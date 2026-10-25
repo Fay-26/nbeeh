@@ -20,7 +20,7 @@ struct ChallengeResultsView: View {
 
                     // Top decoration and title
                     ZStack {
-                        Image("sparkles")
+                        Image("starsmove2")
                             .resizable()
                             .scaledToFit()
                             .frame(
@@ -64,8 +64,8 @@ struct ChallengeResultsView: View {
                             resultSymbol(true)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 20)
-                        .padding(.bottom, 65)
+                        .padding(.top, 30)
+                        .padding(.bottom, 30)
 
                         Text("الإنتباه البصري :")
                             .font(.system(size: 23))
@@ -79,13 +79,13 @@ struct ChallengeResultsView: View {
                             resultSymbol(true)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 25)
+                        .padding(.top, 20)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
                     .frame(
                         maxWidth: .infinity,
-                        maxHeight: geometry.size.height * 0.47,
+                        maxHeight: geometry.size.height * 0.50,
                         alignment: .topTrailing
                     )
                     .background(Color("box"))
@@ -107,7 +107,7 @@ struct ChallengeResultsView: View {
 
     private func resultSymbol(_ success: Bool) -> some View {
         Image(systemName: success ? "checkmark.circle" : "minus.circle")
-            .font(.system(size: 39, weight: .medium))
+            .font(.system(size: 33, weight: .medium))
             .foregroundStyle(Color("mainBG"))
             .frame(maxWidth: .infinity)
     }
