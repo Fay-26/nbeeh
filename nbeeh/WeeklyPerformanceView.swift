@@ -379,12 +379,14 @@ struct WeeklyPerformanceView: View {
 
             // Stages
 
+            NavigationLink(destination: MapView()) {
 
                 navigationItem(
                     title: "المراحل",
-                    icon: "figure.walk",
+                    icon: "point.topleft.down.curvedto.point.bottomright.up",
                     selected: false
                 )
+            }
 
             // Home
 
