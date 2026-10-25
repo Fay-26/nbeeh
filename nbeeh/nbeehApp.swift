@@ -25,5 +25,15 @@ struct nbeehApp: App {
                 HomeView()
             }
         }
+        WindowGroup {
+            NavigationStack {
+                WeeklyPerformanceView()
+            }
+        }
+        WindowGroup {
+            NavigationStack {
+                MapView()
+            }
+        }
     }
 }
