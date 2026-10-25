@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct VisualAttentionTask: View {
-
+    @AppStorage("forceReturnToHome")
+    private var forceReturnToHome = false
+    @State private var showExitConfirmation = false
     var body: some View {
         ZStack {
             Color("mainBG")
@@ -10,13 +12,15 @@ struct VisualAttentionTask: View {
             VStack(spacing: 0) {
 
                 HStack {
-                    Button(action: {}) {
+                   
+                    Button {
+                        showExitConfirmation = true
+                    } label: {
                         Image(systemName: "xmark")
-                            .font(.system(size: 30))
-                            .foregroundStyle(.black)
-                            .frame(width: 52, height: 52)
-                            .background(Color("box"))
-                            .clipShape(Circle())
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundStyle(.taskBG)
+                            .frame(width: 48, height: 48)
+                            .background(Color.box, in: Circle())
                     }
                     .buttonStyle(.plain)
 
@@ -71,6 +75,18 @@ struct VisualAttentionTask: View {
             }
         }
         .preferredColorScheme(.dark)
+        .alert("هل أنت متأكدة من الخروج؟", isPresented: $showExitConfirmation) {
+            Button("الاستمرار", role: .cancel) {
+            }
+
+            Button("تأكيد الخروج", role: .destructive) {
+                print("Exit button tapped")
+                forceReturnToHome = true
+            }
+        } message: {
+            Text("الخروج يؤدي إلى إعادة المرحلة من جديد")
+        }
+        .tint(Color("botton"))
     }
 }
 

@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-// MARK: - Shape Types
 
 private enum GameShape: CaseIterable {
     case circle
@@ -16,7 +15,6 @@ private enum GameShape: CaseIterable {
     case square
 }
 
-// MARK: - Game Tile
 
 private struct GameTile: Identifiable {
     let id = UUID()
@@ -24,29 +22,27 @@ private struct GameTile: Identifiable {
     let colorIndex: Int
 }
 
-// MARK: - Main Game
 
 struct VisualAttentionGame: View {
 
     @Environment(\.dismiss) private var dismiss
-
-    // Difficulty is saved between sessions
+    @State private var showExitConfirmation = false
+    @AppStorage("forceReturnToHome")
+    private var forceReturnToHome = false
     @AppStorage("visualAttentionDifficulty")
     private var difficultyLevel = 0
 
-    // Five rounds per session
     @State private var roundNumber = 1
     @State private var boardTiles: [GameTile] = []
     @State private var targetShape: GameShape = .triangle
     @State private var isFinished = false
+    @State private var showResults = false
 
-    // Hidden performance tracking
     @State private var roundStart = Date()
     @State private var reactionTimes: [Double] = []
     @State private var correctAnswers = 0
     @State private var totalErrors = 0
 
-    // Adaptive difficulty
     @State private var fastCorrectStreak = 0
     @State private var consecutiveErrors = 0
 
@@ -58,45 +54,41 @@ struct VisualAttentionGame: View {
     var body: some View {
 
         ZStack {
-            Color("mainBG")
+            Color("taskBG")
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
 
-                // MARK: Header
 
                 HStack {
-
+                   
                     Button {
-                        dismiss()
+                        showExitConfirmation = true
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 30, weight: .semibold))
-                            .foregroundStyle(Color("mainBG"))
+                            .foregroundStyle(Color("taskBG"))
                             .frame(width: 48, height: 48)
-                            .background(
-                                Color("box"),
-                                in: Circle()
-                            )
+                            .background(Color("box"), in: Circle())
                     }
                     .buttonStyle(.plain)
 
                     Spacer()
 
                     Text("تحدي الانتباه البصري")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 25, weight: .semibold))
                         .foregroundStyle(Color("mainBG"))
                         .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 18)
                         .background(
                             Color("box"),
-                            in: RoundedRectangle(cornerRadius: 12)
+                            in: RoundedRectangle(cornerRadius:20)
                         )
 
                     Spacer()
 
                     Image(systemName: "eye")
-                        .font(.system(size: 30, weight: .semibold))
+                        .font(.system(size: 35, weight: .semibold))
                         .foregroundStyle(Color("box"))
                 }
                 .padding(.horizontal, 18)
@@ -104,25 +96,30 @@ struct VisualAttentionGame: View {
 
                 Spacer(minLength: 18)
 
-                // MARK: Game Board
 
                 ZStack {
 
                     Color.white
 
                     if isFinished {
-
-                        Text("انتهت الجولات الخمس!")
-                            .font(.system(size: 25, weight: .semibold))
-                            .foregroundStyle(Color("mainBG"))
-                            .multilineTextAlignment(.center)
-                            .padding()
+                        Button {
+                            showResults = true
+                        } label: {
+                            Text("انتهت الجولات الخمس!\nاضغط هنا لعرض النتائج")
+                                .font(.system(size: 26, weight: .semibold))
+                                .foregroundStyle(Color("mainBG"))
+                                .multilineTextAlignment(.center)
+                                .padding()
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
 
                     } else {
 
                         LazyVGrid(
                             columns: columns,
-                            spacing: 50
+                            spacing: 60
                         ) {
 
                             ForEach(boardTiles) { tile in
@@ -144,19 +141,44 @@ struct VisualAttentionGame: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 520)
+                .frame(height: 580)
                 .clipShape(
                     RoundedRectangle(cornerRadius: 50)
                 )
-                .padding(.horizontal, 18)
+                .padding(.horizontal, 30)
 
                 Spacer(minLength: 18)
             }
         }
         .preferredColorScheme(.dark)
+        .navigationDestination(isPresented: $showResults) {
+            ChallengeResultsView(
+                visualCorrectAnswers: correctAnswers,
+                visualTotalErrors: totalErrors,
+                visualAverageReactionTime: reactionTimes.isEmpty
+                    ? 0
+                    : reactionTimes.reduce(0, +) / Double(reactionTimes.count)
+            )
+        }
         .onAppear {
             startSession()
         }
+        .preferredColorScheme(.dark)
+        .onAppear {
+            startSession()
+        }
+        .alert("هل أنت متأكد من الخروج؟", isPresented: $showExitConfirmation) {
+            Button("الاستمرار", role: .cancel) {
+            }
+
+            Button("تأكيد الخروج", role: .destructive) {
+                print("Exit button tapped")
+                forceReturnToHome = true
+            }
+        } message: {
+            Text("الخروج يؤدي إلى إعادة المرحلة من جديد")
+        }
+        .tint(Color("botton"))
     }
 
 
@@ -338,7 +360,7 @@ private struct ShapeView: View {
     private var shapeColor: Color {
         tile.colorIndex == 0
             ? Color("botton")
-            : Color("mainBG")
+            : Color("taskBG")
     }
 }
 

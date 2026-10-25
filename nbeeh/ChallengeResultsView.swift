@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct ChallengeResultsView: View {
+    
+    var visualCorrectAnswers: Int = 0
+    var visualTotalErrors: Int = 0
+    var visualAverageReactionTime: Double = 0
 
     var body: some View {
         GeometryReader { geometry in
@@ -72,11 +76,9 @@ struct ChallengeResultsView: View {
                             .foregroundStyle(Color("mainBG"))
 
                         HStack(spacing: 0) {
-                            resultSymbol(false)
-                            resultSymbol(false)
-                            resultSymbol(true)
-                            resultSymbol(true)
-                            resultSymbol(true)
+                            ForEach(0..<5, id: \.self) { index in
+                                resultSymbol(index < visualCorrectAnswers)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.top, 20)

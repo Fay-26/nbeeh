@@ -40,19 +40,19 @@ struct  AudWalkTask: View {
                 Spacer()
 
                 Text("تحدي الانتباه السمعي")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 25, weight: .semibold))
                     .foregroundStyle(.mainBG)
                     .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 18)
                     .background(
                         Color.box,
-                        in: RoundedRectangle(cornerRadius: 12)
+                        in: RoundedRectangle(cornerRadius: 20)
                     )
 
                 Spacer()
 
                 Image(systemName: "ear.badge.waveform")
-                    .font(.system(size: 30, weight: .semibold))
+                    .font(.system(size: 35, weight: .semibold))
                     .foregroundStyle(.box)
             }
             .frame(maxWidth: .infinity)
