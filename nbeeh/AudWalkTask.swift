@@ -14,10 +14,41 @@
 //
 
 import SwiftUI
+import CoreMotion
 
 struct  AudWalkTask: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showExitConfirmation = false
+    @State private var heardCount = 0
+    @State private var correctCount = 0
+    @State private var incorrectCount = 0
+    @State private var remainingSteps = 1000
+    private let pedometer = CMPedometer()
+    private let startDate = Date()
+    
+    private func startStepCounting() {
+        guard CMPedometer.isStepCountingAvailable() else {
+            return
+        }
+
+        remainingSteps = 1000
+
+        pedometer.startUpdates(from: startDate) { data, error in
+            guard let data = data, error == nil else {
+                return
+            }
+
+            DispatchQueue.main.async {
+                let stepsWalked = data.numberOfSteps.intValue
+                remainingSteps = max(0, 1000 - stepsWalked)
+
+                if remainingSteps == 0 {
+                    pedometer.stopUpdates()
+                }
+            }
+        }
+    }
+    
     
     var body: some View {
         VStack(spacing: 0) {
@@ -89,8 +120,8 @@ struct  AudWalkTask: View {
             .padding(.horizontal, 8)
             // عداد الخطوات
             VStack(spacing: 8) {
-                Text("950")
-                    .font(.system(size: 72, weight: .bold))
+                Text("\(remainingSteps)")
+                    .font(.system(size: 68, weight: .bold))
                     .foregroundStyle(.mainBG)
 
                 Text("العد التنازلي لخطواتك")
@@ -116,6 +147,8 @@ struct  AudWalkTask: View {
         
             Button {
                 // بنضيف وظيفة الزر لاحقًا
+                heardCount += 1
+              
             } label: {
                 Text("سمعت")
                     .font(.system(size: 24, weight: .semibold))
@@ -135,6 +168,16 @@ struct  AudWalkTask: View {
             alignment: .top
         )
         .background(Color.taskBG)
+        
+        .onAppear {
+            startStepCounting()
+        }
+        .onDisappear {
+            pedometer.stopUpdates()
+        }
+        
+    
+        
         
         .alert("هل انت متأكد من الخروج", isPresented: $showExitConfirmation) {
             Button("الاستمرار", role: .cancel) {
