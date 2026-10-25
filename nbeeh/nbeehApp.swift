@@ -30,10 +30,5 @@ struct nbeehApp: App {
                 WeeklyPerformanceView()
             }
         }
-        WindowGroup {
-            NavigationStack {
-                MapView()
-            }
-        }
     }
 }
