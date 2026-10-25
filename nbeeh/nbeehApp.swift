@@ -23,14 +23,13 @@ struct nbeehApp: App {
             }
             .id(rootID)
             .onChange(of: forceReturnToHome) { _, shouldReturn in
-                print("Exit requested:", shouldReturn)
+                guard shouldReturn else { return }
 
-                if shouldReturn {
-                    hasCompletedIntroduction = true
+                if hasCompletedIntroduction {
                     rootID = UUID()
-                    forceReturnToHome = false
-                    print("Returning to HomeView")
                 }
+
+                forceReturnToHome = false
             }
         }
     }

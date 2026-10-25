@@ -3,6 +3,7 @@ import SwiftUI
 struct VisualAttentionTask: View {
     @AppStorage("forceReturnToHome")
     private var forceReturnToHome = false
+
     @State private var showExitConfirmation = false
     var body: some View {
         ZStack {
@@ -18,9 +19,9 @@ struct VisualAttentionTask: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 30, weight: .semibold))
-                            .foregroundStyle(.taskBG)
+                            .foregroundStyle(Color("mainBG"))
                             .frame(width: 48, height: 48)
-                            .background(Color.box, in: Circle())
+                            .background(Color("box"), in: Circle())
                     }
                     .buttonStyle(.plain)
 
@@ -80,13 +81,11 @@ struct VisualAttentionTask: View {
             }
 
             Button("تأكيد الخروج", role: .destructive) {
-                print("Exit button tapped")
                 forceReturnToHome = true
             }
         } message: {
             Text("الخروج يؤدي إلى إعادة المرحلة من جديد")
         }
-        .tint(Color("botton"))
     }
 }
 
