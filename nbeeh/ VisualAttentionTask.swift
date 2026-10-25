@@ -41,7 +41,7 @@ struct VisualAttentionTask: View {
                 Image("smart")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 250, height: 220)
+                    .frame(width: 300, height: 250)
 
                 Text("وعشان تدرب تركيزك أكثر كمل اخر جزء من التحدي")
                     .font(.system(size: 23))
