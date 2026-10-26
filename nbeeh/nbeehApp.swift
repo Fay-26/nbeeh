@@ -30,5 +30,15 @@ struct nbeehApp: App {
                 WeeklyPerformanceView()
             }
         }
+        WindowGroup {
+            NavigationStack {
+                AboutAppView()
+            }
+        }
+        WindowGroup {
+            NavigationStack {
+                HomeView()
+            }
+        }
     }
 }

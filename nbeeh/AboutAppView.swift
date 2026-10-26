@@ -91,10 +91,7 @@ struct AboutAppView: View {
                 
                 Spacer()
                 
-                // زر "فهمت" بالأسفل
-                Button(action: {
-                    // إجراء الزر
-                }) {
+                NavigationLink(destination: HomeView()) {
                     Text("فهمت")
                         .font(.system(size: 28, weight: .semibold))
                         .foregroundColor(Color("textbig"))
