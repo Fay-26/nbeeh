@@ -86,10 +86,11 @@ struct LandingView: View {
                 }
             }
         }
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .leftToRight)
     }
 }
 
 #Preview {
     LandingView()
 }
+
