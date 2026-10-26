@@ -55,7 +55,6 @@ struct VisualAttentionGame: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    // Header
                     HStack {
                         Button {
                             dismiss()
@@ -91,7 +90,6 @@ struct VisualAttentionGame: View {
 
                     Spacer(minLength: 18)
 
-                    // Game board
                     ZStack {
                         Color.white
 
