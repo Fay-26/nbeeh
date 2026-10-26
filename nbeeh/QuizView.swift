@@ -178,39 +178,34 @@ struct QuizView: View {
 
     // MARK: - رأس الصفحة
     private var headerView: some View {
-        HStack(spacing: 12) {
+        HStack {
             Button {
                 showExitAlert = true
             } label: {
                 Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.black)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Color(
-                            red: 194.0 / 255.0,
-                            green: 169.0 / 255.0,
-                            blue: 201.0 / 255.0
-                        )
-                    )
-                    .clipShape(Circle())
+                    .font(.system(size: 30, weight: .semibold))
+                    .foregroundStyle(.taskBG)
+                    .frame(width: 48, height: 48)
+                    .background(Color.box, in: Circle())
             }
 
-            Spacer(minLength: 0)
+            Spacer()
 
             Text("تحدي الانتباه السمعي")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(questionTextColor)
-                .padding(.horizontal, 13)
-                .padding(.vertical, 10)
-                .background(questionColor)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .font(.system(size: 25, weight: .semibold))
+                .foregroundStyle(.mainBG)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 18)
+                .background(
+                    Color.box,
+                    in: RoundedRectangle(cornerRadius: 20))
 
-            Spacer(minLength: 0)
 
-            Image(systemName: "ear")
-                .font(.system(size: 25))
-                .foregroundStyle(questionColor)
+            Spacer()
+
+            Image(systemName: "ear.badge.waveform")
+                .font(.system(size: 35, weight: .semibold))
+                .foregroundStyle(.box)
         }
         .environment(\.layoutDirection, .leftToRight)
     }
