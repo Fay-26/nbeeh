@@ -44,54 +44,55 @@ struct WeeklyPerformanceView: View {
     // MARK: - Main View
 
     var body: some View {
+        NavigationStack {
+            GeometryReader { geometry in
 
-        GeometryReader { geometry in
+                let screenWidth = geometry.size.width
+                let screenHeight = geometry.size.height
 
-            let screenWidth = geometry.size.width
-            let screenHeight = geometry.size.height
+                let contentWidth = min(332, screenWidth - 48)
+                let verticalScale = min(1, screenHeight / 780)
 
-            let contentWidth = min(332, screenWidth - 48)
+                ZStack {
 
-            let verticalScale = min(1, screenHeight / 780)
+                    backgroundColor
+                        .ignoresSafeArea()
 
-            ZStack {
+                    VStack(spacing: 0) {
 
-                backgroundColor
-                    .ignoresSafeArea()
+                        stepsCard
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .trailing
+                            )
+                            .padding(.top, 28)
 
-                VStack(spacing: 0) {
+                        performanceTitle
+                            .padding(.top, 64 * verticalScale)
 
-                    stepsCard
-                        .frame(
-                            maxWidth: .infinity,
-                            alignment: .trailing
-                        )
-                        .padding(.top, 28)
+                        weeklyChart
+                            .padding(.top, 24 * verticalScale)
 
-                    performanceTitle
-                        .padding(.top, 64 * verticalScale)
+                        completedChallengesCard
+                            .padding(.top, 44 * verticalScale)
 
-                    weeklyChart
-                        .padding(.top, 24 * verticalScale)
+                        attentionAccuracyCard
+                            .padding(.top, 28 * verticalScale)
 
-                    completedChallengesCard
-                        .padding(.top, 44 * verticalScale)
+                        Spacer(minLength: 8)
 
-                    attentionAccuracyCard
-                        .padding(.top, 28 * verticalScale)
-
-                    Spacer(minLength: 8)
-
-                    bottomNavigationBar
-                        .padding(.bottom, 8)
+                        bottomNavigationBar
+                            .padding(.bottom, 8)
+                    }
+                    .frame(width: contentWidth)
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .top
+                    )
                 }
-                .frame(width: contentWidth)
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity,
-                    alignment: .top
-                )
             }
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 
@@ -126,7 +127,6 @@ struct WeeklyPerformanceView: View {
         .padding(.trailing, 0)
         .frame(width: 220, height: 48)
         .background {
-
             RoundedRectangle(cornerRadius: 20)
                 .fill(cardColor)
                 .stroke(
@@ -147,8 +147,6 @@ struct WeeklyPerformanceView: View {
                 .foregroundStyle(primaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-
-
         }
         .frame(maxWidth: .infinity)
     }
@@ -190,9 +188,9 @@ struct WeeklyPerformanceView: View {
                             }
                             .frame(
                                 height: item.accuracy == nil
-                                    ? 4
-                                    : chartGeometry.size.height *
-                                      CGFloat(item.accuracy ?? 0) / 100
+                                ? 4
+                                : chartGeometry.size.height *
+                                  CGFloat(item.accuracy ?? 0) / 100
                             )
                         }
                         .frame(maxWidth: .infinity)
@@ -266,8 +264,8 @@ struct WeeklyPerformanceView: View {
 
                     Image(
                         systemName: completed
-                            ? "checkmark"
-                            : "xmark"
+                        ? "checkmark"
+                        : "xmark"
                     )
                     .font(.system(size: 14))
                     .foregroundStyle(darkText)
@@ -371,28 +369,40 @@ struct WeeklyPerformanceView: View {
 
         HStack(spacing: 0) {
 
+            // Performance - Current Page
+
             navigationItem(
                 title: "الأداء",
                 icon: "chart.bar.fill",
                 selected: true
             )
 
-            navigationItem(
-                title: "المراحل",
-                icon: "figure.walk",
-                selected: false
-            )
+            // Stages
 
-            navigationItem(
-                title: "الرئيسية",
-                icon: "house.fill",
-                selected: false
-            )
+            NavigationLink(destination: MapView()) {
+
+                navigationItem(
+                    title: "المراحل",
+                    icon: "point.topleft.down.curvedto.point.bottomright.up",
+                    selected: false
+                )
+            }
+
+            // Home
+
+            NavigationLink(destination: HomeView()) {
+
+                navigationItem(
+                    title: "الرئيسية",
+                    icon: "house.fill",
+                    selected: false
+                )
+            }
         }
+        .buttonStyle(.plain)
         .padding(4)
         .frame(width: 276, height: 64)
         .background {
-
             Capsule()
                 .fill(cardColor)
         }
@@ -433,4 +443,3 @@ struct WeeklyPerformanceView: View {
 #Preview {
     WeeklyPerformanceView()
 }
-

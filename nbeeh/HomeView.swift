@@ -1,9 +1,15 @@
 
+
 import SwiftUI
 
 struct HomeView: View {
 
     @State private var selectedTab: Tab = .home
+
+    // بيانات المستخدم
+    @State private var userLevel: Int = 2
+    @State private var userStreak: Int = 3
+    @State private var dailySteps: Int = 1000
 
     var body: some View {
         NavigationStack {
@@ -148,12 +154,18 @@ struct HomeView: View {
                 CustomTabBar(selectedTab: $selectedTab)
                     .padding(.bottom, 10)
             }
+
+            // شريط التنقل السفلي
+            CustomTabBar(selectedTab: $selectedTab)
+                .padding(.bottom, 10)
         }
       
     }
 }
 
 #Preview {
-    HomeView()
+    NavigationStack {
+        HomeView()
+    }
 }
 

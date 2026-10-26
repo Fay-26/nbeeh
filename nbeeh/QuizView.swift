@@ -13,9 +13,20 @@ struct QuizQuestion {
     let correctAnswer: Int
 }
 
+// MARK: - نموذج القصة
+struct QuizStory {
+    let questions: [QuizQuestion]
+}
+
+// MARK: - نتائج الاختبار
+struct ChallengeResult {
+    let correctAnswers: Int
+    let wrongAnswers: Int
+}
+
 struct QuizView: View {
 
-    
+    // MARK: - الألوان
     private let backgroundColor = Color("taskBG")
     private let questionColor = Color("box")
     private let buttonColor = Color("botton")
@@ -25,50 +36,95 @@ struct QuizView: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    private let questions: [QuizQuestion] = [
+    // MARK: - القصة الأولى
+    private let storyOne = QuizStory(questions: [
         QuizQuestion(
-            question: "ايش اسم الشخصية الرئيسية بالقصة؟",
-            options: ["سعود", "خالد", "محمد"],
-            correctAnswer: 0
+            question: "متى بدت الأحداث؟",
+            options: ["1:30 الليل", "2:30 الليل", "1:00 الليل"],
+            correctAnswer: 1
         ),
         QuizQuestion(
-            question: "وش الأشياء الشخصية اللي كان شايلها معه؟",
+            question: "إيش الصوت اللي سمعه خالد؟",
+            options: ["ذيب", "تخديش", "طق"],
+            correctAnswer: 1
+        ),
+        QuizQuestion(
+            question: "مين هو الشخص اللي أرسل رسالة لخالد ووين؟",
             options: [
-                "قلم، دفتر، ساندوتش",
-                "جوال، سماعات، مفاتيح",
-                "علك، محفظة، نظارة"
+                "سلطان أرسل في سناب",
+                "سلطان أرسل في واتساب",
+                "سلطان أرسل في تيك توك"
             ],
             correctAnswer: 1
         ),
         QuizQuestion(
-            question: "كيف راح سعود للجامعة؟",
-            options: ["بالباص", "بالمترو", "بالسيارة"],
+            question: "إيش راحوا يجيبون سلطان وفهد من السيارة؟",
+            options: ["كشاف", "حطب", "ماء"],
+            correctAnswer: 1
+        ),
+        QuizQuestion(
+            question: "وين كشتوا الشباب؟",
+            options: ["التنهات", "روضة خريم", "صد صلبوخ"],
+            correctAnswer: 1
+        )
+    ])
+
+    // MARK: - القصة الثانية
+    private let storyTwo = QuizStory(questions: [
+        QuizQuestion(
+            question: "كم كانت الساعة لما رجع سعود من المطار؟",
+            options: [
+                "11:45 بالليل",
+                "12:20 بعد منتصف الليل",
+                "1:15 بعد منتصف الليل"
+            ],
+            correctAnswer: 1
+        ),
+        QuizQuestion(
+            question: "وش كان لون جاكيت الراكب؟",
+            options: ["رمادي", "أسود", "بني"],
+            correctAnswer: 0
+        ),
+        QuizQuestion(
+            question: "وش طلب الراكب من البقالة؟",
+            options: [
+                "موية عادية وشوكولاتة",
+                "قهوة باردة وعلك",
+                "موية غازية وعلبة علك نعناع"
+            ],
             correctAnswer: 2
         ),
         QuizQuestion(
-            question: "تأخر سعود على أي كلاس؟",
-            options: ["أناتومي", "ماث", "إنجليزي"],
+            question: "وش لون الظرف اللي تركه الراكب؟",
+            options: ["أبيض", "أصفر", "أزرق"],
             correctAnswer: 1
         ),
         QuizQuestion(
-            question: "سبب تأخير سعود عن الكلاس؟",
+            question: "وين لقى سعود جوال فهد؟",
             options: [
-                "زحمة المرور",
-                "قابل صديقه في الطريق",
-                "سقطت أغراضه"
+                "تحت المقعد الخلفي",
+                "داخل الظرف",
+                "عند باب الفندق"
             ],
             correctAnswer: 0
         )
-    ]
+    ])
 
+    // MARK: - حالة الاختبار
+    @State private var selectedStory: QuizStory?
     @State private var currentQuestionIndex = 0
     @State private var correctAnswers = 0
     @State private var wrongAnswers = 0
     @State private var selectedAnswer: Int? = nil
     @State private var hasAnswered = false
-
     @State private var showExitAlert = false
-    @State private var showCompletionMessage = false
+    @State private var goToVisualTask = false
+    @State private var goToHome = false
+
+    
+    private var questions: [QuizQuestion] {
+        selectedStory?.questions ?? []
+    }
 
     private var currentQuestion: QuizQuestion {
         questions[currentQuestionIndex]
@@ -81,9 +137,7 @@ struct QuizView: View {
 
             VStack(spacing: 0) {
                 headerView
-
                 progressView
-
                 questionView
 
                 Spacer(minLength: 35)
@@ -97,43 +151,34 @@ struct QuizView: View {
             .padding(.bottom, 20)
             .environment(\.layoutDirection, .rightToLeft)
         }
-
+        .onAppear {
+            if selectedStory == nil {
+                selectedStory = Bool.random() ? storyOne : storyTwo
+            }
+        }
+        .navigationDestination(isPresented: $goToVisualTask) {
+            VisualAttentionTask()
+        }
+        .navigationDestination(isPresented: $goToHome) {
+            HomeView()
+        }
         .alert(
             "هل أنت متأكد من الخروج؟",
             isPresented: $showExitAlert
         ) {
             Button("تأكيد الخروج", role: .destructive) {
-                dismiss()
+                goToHome = true
             }
 
-            Button("الاستمرار", role: .cancel) {
-            }
+            Button("الاستمرار", role: .cancel) {}
         } message: {
             Text("الخروج يؤدي إلى إعادة المرحلة من جديد.")
         }
-
-        .alert(
-            "خلصتي التحدي!",
-            isPresented: $showCompletionMessage
-        ) {
-            Button("إعادة التحدي") {
-                resetQuiz()
-            }
-
-            Button("إنهاء", role: .cancel) {
-            }
-        } message: {
-            Text(
-                "الإجابات الصحيحة: \(correctAnswers)\n" +
-                "الإجابات الخاطئة: \(wrongAnswers)"
-            )
-        }
     }
 
+    // MARK: - رأس الصفحة
     private var headerView: some View {
         HStack(spacing: 12) {
-
-            
             Button {
                 showExitAlert = true
             } label: {
@@ -153,7 +198,6 @@ struct QuizView: View {
 
             Spacer(minLength: 0)
 
-            
             Text("تحدي الانتباه السمعي")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(questionTextColor)
@@ -164,17 +208,14 @@ struct QuizView: View {
 
             Spacer(minLength: 0)
 
-           
             Image(systemName: "ear")
                 .font(.system(size: 25))
                 .foregroundStyle(questionColor)
         }
-
-
         .environment(\.layoutDirection, .leftToRight)
     }
 
-
+    // MARK: - التقدم
     private var progressView: some View {
         HStack {
             Text("السؤال \(currentQuestionIndex + 1) من \(questions.count)")
@@ -190,56 +231,56 @@ struct QuizView: View {
         .padding(.top, 28)
     }
 
-
+    // MARK: - السؤال
     private var questionView: some View {
-        Text(currentQuestion.question)
-            .font(.system(size: 19, weight: .medium))
-            .foregroundStyle(questionTextColor)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: 135)
-            .padding(.horizontal, 16)
-            .background(questionColor)
-            .clipShape(RoundedRectangle(cornerRadius: 32))
-            .padding(.top, 34)
+        Text(
+            questions.indices.contains(currentQuestionIndex)
+                ? currentQuestion.question
+                : ""
+        )
+        .font(.system(size: 19, weight: .medium))
+        .foregroundStyle(questionTextColor)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 135)
+        .padding(.horizontal, 16)
+        .background(questionColor)
+        .clipShape(RoundedRectangle(cornerRadius: 32))
+        .padding(.top, 34)
     }
 
+    // MARK: - الخيارات
     private var answersView: some View {
         VStack(spacing: 24) {
-            ForEach(
-                currentQuestion.options.indices,
-                id: \.self
-            ) { index in
-
-                Button {
-                    selectAnswer(index)
-                } label: {
-                    Text(currentQuestion.options[index])
-                        .font(.system(size: 16))
-                        .foregroundStyle(answerTextColor)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(
-                            selectedAnswer == index
-                            ? buttonColor
-                            : Color.clear
-                        )
-                        .clipShape(Capsule())
-                        .overlay {
-                            Capsule()
-                                .stroke(
-                                    borderColor,
-                                    lineWidth: 0.8
-                                )
-                        }
+            if questions.indices.contains(currentQuestionIndex) {
+                ForEach(currentQuestion.options.indices, id: \.self) { index in
+                    Button {
+                        selectAnswer(index)
+                    } label: {
+                        Text(currentQuestion.options[index])
+                            .font(.system(size: 16))
+                            .foregroundStyle(answerTextColor)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(
+                                selectedAnswer == index
+                                    ? buttonColor
+                                    : Color.clear
+                            )
+                            .clipShape(Capsule())
+                            .overlay {
+                                Capsule()
+                                    .stroke(borderColor, lineWidth: 0.8)
+                            }
+                    }
+                    .disabled(hasAnswered)
                 }
-                .disabled(hasAnswered)
             }
         }
         .padding(.horizontal, 2)
     }
 
-
+    // MARK: - اختيار الإجابة
     private func selectAnswer(_ index: Int) {
         guard !hasAnswered else { return }
 
@@ -258,20 +299,14 @@ struct QuizView: View {
                 selectedAnswer = nil
                 hasAnswered = false
             } else {
-                showCompletionMessage = true
+                goToVisualTask = true
             }
         }
-    }
-
-    private func resetQuiz() {
-        currentQuestionIndex = 0
-        correctAnswers = 0
-        wrongAnswers = 0
-        selectedAnswer = nil
-        hasAnswered = false
     }
 }
 
 #Preview {
-    QuizView()
+    NavigationStack {
+        QuizView()
+    }
 }
