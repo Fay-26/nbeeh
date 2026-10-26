@@ -129,6 +129,7 @@ CustomTabBar(selectedTab: $selectedTab)
 .padding(.bottom, 10)
 }
 }
+.navigationBarBackButtonHidden(true)
 }
 }
 #Preview {

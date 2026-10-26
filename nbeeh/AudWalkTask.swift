@@ -1,9 +1,3 @@
-//
-//  AudWalkTask.swift
-//  nbeeh
-//
-//  Created by Njoud Altalal on 11/05/1448 AH.
-//
 
 
 //

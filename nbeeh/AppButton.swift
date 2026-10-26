@@ -7,7 +7,6 @@
 import SwiftUI
 
 struct AppButton: View {
-
     let onConfirmExit: () -> Void
 
     @State private var showExitAlert = false
@@ -29,6 +28,7 @@ struct AppButton: View {
                 )
                 .clipShape(Circle())
         }
+        .buttonStyle(.plain)
         .alert(
             "هل أنت متأكد من الخروج؟",
             isPresented: $showExitAlert
@@ -43,5 +43,3 @@ struct AppButton: View {
         }
     }
 }
-
-

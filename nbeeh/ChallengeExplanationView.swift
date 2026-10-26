@@ -90,7 +90,7 @@ struct ChallengeExplanationView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .environment(\.layoutDirection, .rightToLeft)
+        .environment(\.layoutDirection, .leftToRight)
     }
 }
 
