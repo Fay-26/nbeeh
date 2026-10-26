@@ -10,7 +10,7 @@ struct MapView: View {
 
     // MARK: - Navigation
 
-    @State private var selectedTab = 1
+    @State private var selectedTab: Tab = .levels
 
     // MARK: - Design Size
 
@@ -63,7 +63,9 @@ struct MapView: View {
     // MARK: - Main View
 
     var body: some View {
+
         NavigationStack {
+
             GeometryReader { geometry in
 
                 let scale = min(
@@ -81,13 +83,16 @@ struct MapView: View {
 
                     ZStack(alignment: .topLeading) {
 
-                        // 1. Bottom decorations
+                        // 1. Bottom Decorations
+
                         bottomDecorations
 
-                        // 2. Background stars
+                        // 2. Background Stars
+
                         starsLayer
 
-                        // 3. Curved road
+                        // 3. Curved Road
+
                         SmoothStageRoad(
                             points: stagePositions
                         )
@@ -105,6 +110,7 @@ struct MapView: View {
                         )
 
                         // 4. Stages
+
                         ForEach(1...7, id: \.self) { number in
 
                             let point = stagePositions[number - 1]
@@ -116,15 +122,9 @@ struct MapView: View {
                             )
                         }
 
-                        // 5. Unlocked stage sparkles
-                        unlockedStageSparkles
+                        // 5. Unlocked Stage Sparkles
 
-                        // 6. Bottom navigation
-                        bottomNavigation
-                            .position(
-                                x: 201,
-                                y: 810
-                            )
+                        unlockedStageSparkles
                     }
                     .frame(
                         width: designWidth,
@@ -145,7 +145,16 @@ struct MapView: View {
                     height: geometry.size.height
                 )
             }
-            .ignoresSafeArea()
+
+            // MARK: - Custom Tab Bar
+            // نفس طريقة صفحة الأداء
+
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+
+                CustomTabBar(selectedTab: $selectedTab)
+                    .padding(.bottom, 8)
+            }
+
             .toolbar(.hidden, for: .navigationBar)
         }
 
@@ -153,8 +162,12 @@ struct MapView: View {
 
         .fullScreenCover(
             isPresented: Binding(
-                get: { selectedTab == 0 },
-                set: { if !$0 { selectedTab = 1 } }
+                get: { selectedTab == .home },
+                set: {
+                    if !$0 {
+                        selectedTab = .levels
+                    }
+                }
             )
         ) {
             HomeView()
@@ -162,8 +175,12 @@ struct MapView: View {
 
         .fullScreenCover(
             isPresented: Binding(
-                get: { selectedTab == 2 },
-                set: { if !$0 { selectedTab = 1 } }
+                get: { selectedTab == .performance },
+                set: {
+                    if !$0 {
+                        selectedTab = .levels
+                    }
+                }
             )
         ) {
             WeeklyPerformanceView()
@@ -366,7 +383,8 @@ struct MapView: View {
 
         ZStack(alignment: .topLeading) {
 
-            // Left purple shape
+            // Left Purple Shape
+
             Ellipse()
                 .fill(
                     Color(
@@ -385,7 +403,8 @@ struct MapView: View {
                     y: 795
                 )
 
-            // Right blue shape
+            // Right Blue Shape
+
             Ellipse()
                 .fill(
                     Color(
@@ -404,7 +423,8 @@ struct MapView: View {
                     y: 785
                 )
 
-            // Right purple shadow
+            // Right Purple Shadow
+
             Ellipse()
                 .fill(
                     Color(
@@ -429,91 +449,9 @@ struct MapView: View {
             height: designHeight
         )
     }
-
-    // MARK: - Bottom Navigation
-
-    private var bottomNavigation: some View {
-
-        HStack(spacing: 0) {
-
-            // Performance
-            Button {
-                selectedTab = 2
-            } label: {
-                navigationItem(
-                    icon: "chart.bar.fill",
-                    title: "الأداء",
-                    selected: selectedTab == 2
-                )
-            }
-
-            // Stages
-            Button {
-                selectedTab = 1
-            } label: {
-                navigationItem(
-                    icon: "point.topleft.down.curvedto.point.bottomright.up",
-                    title: "المراحل",
-                    selected: selectedTab == 1
-                )
-            }
-
-            // Home
-            Button {
-                selectedTab = 0
-            } label: {
-                navigationItem(
-                    icon: "house.fill",
-                    title: "الرئيسية",
-                    selected: selectedTab == 0
-                )
-            }
-        }
-        .buttonStyle(.plain)
-        .frame(
-            width: 276,
-            height: 64
-        )
-        .background(
-            Color("taskBG")
-                .opacity(0.88)
-        )
-        .clipShape(Capsule())
-    }
-
-    private func navigationItem(
-        icon: String,
-        title: String,
-        selected: Bool
-    ) -> some View {
-
-        VStack(spacing: 3) {
-
-            Image(systemName: icon)
-                .font(.system(size: 23))
-
-            Text(title)
-                .font(.system(size: 10))
-        }
-        .foregroundStyle(
-            selected
-            ? roadColor
-            : .white
-        )
-        .frame(maxWidth: .infinity)
-        .frame(height: 58)
-        .background {
-
-            if selected {
-
-                Capsule()
-                    .fill(
-                        Color.white.opacity(0.09)
-                    )
-            }
-        }
-    }
 }
+
+// MARK: - Preview
 
 #Preview {
     MapView()

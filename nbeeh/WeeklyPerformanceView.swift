@@ -8,6 +8,10 @@ import SwiftUI
 
 struct WeeklyPerformanceView: View {
 
+    // MARK: - Navigation
+
+    @State private var selectedTab: Tab = .performance
+
     // MARK: - Colors
 
     private let backgroundColor = Color("mainBG")
@@ -44,7 +48,9 @@ struct WeeklyPerformanceView: View {
     // MARK: - Main View
 
     var body: some View {
+
         NavigationStack {
+
             GeometryReader { geometry in
 
                 let screenWidth = geometry.size.width
@@ -80,9 +86,6 @@ struct WeeklyPerformanceView: View {
                             .padding(.top, 28 * verticalScale)
 
                         Spacer(minLength: 8)
-
-                        bottomNavigationBar
-                            .padding(.bottom, 8)
                     }
                     .frame(width: contentWidth)
                     .frame(
@@ -92,7 +95,44 @@ struct WeeklyPerformanceView: View {
                     )
                 }
             }
+
+            // MARK: - Custom Tab Bar
+
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+
+                CustomTabBar(selectedTab: $selectedTab)
+                    .padding(.bottom, 8)
+            }
+
             .toolbar(.hidden, for: .navigationBar)
+        }
+
+        // MARK: - Navigation Destinations
+
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { selectedTab == .levels },
+                set: {
+                    if !$0 {
+                        selectedTab = .performance
+                    }
+                }
+            )
+        ) {
+            MapView()
+        }
+
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { selectedTab == .home },
+                set: {
+                    if !$0 {
+                        selectedTab = .performance
+                    }
+                }
+            )
+        ) {
+            HomeView()
         }
     }
 
@@ -178,10 +218,12 @@ struct WeeklyPerformanceView: View {
                                 if let accuracy = item.accuracy {
 
                                     Text("\(Int(accuracy))%")
-                                        .font(.system(
-                                            size: 10,
-                                            weight: .semibold
-                                        ))
+                                        .font(
+                                            .system(
+                                                size: 10,
+                                                weight: .semibold
+                                            )
+                                        )
                                         .foregroundStyle(primaryText)
                                         .padding(.top, 4)
                                 }
@@ -360,80 +402,6 @@ struct WeeklyPerformanceView: View {
             RoundedRectangle(cornerRadius: 20)
                 .fill(cardColor)
                 .stroke(primaryText, lineWidth: 1)
-        }
-    }
-
-    // MARK: - Bottom Navigation
-
-    private var bottomNavigationBar: some View {
-
-        HStack(spacing: 0) {
-
-            // Performance - Current Page
-
-            navigationItem(
-                title: "الأداء",
-                icon: "chart.bar.fill",
-                selected: true
-            )
-
-            // Stages
-
-            NavigationLink(destination: MapView()) {
-
-                navigationItem(
-                    title: "المراحل",
-                    icon: "point.topleft.down.curvedto.point.bottomright.up",
-                    selected: false
-                )
-            }
-
-            // Home
-
-            NavigationLink(destination: HomeView()) {
-
-                navigationItem(
-                    title: "الرئيسية",
-                    icon: "house.fill",
-                    selected: false
-                )
-            }
-        }
-        .buttonStyle(.plain)
-        .padding(4)
-        .frame(width: 276, height: 64)
-        .background {
-            Capsule()
-                .fill(cardColor)
-        }
-    }
-
-    // MARK: - Navigation Item
-
-    private func navigationItem(
-        title: String,
-        icon: String,
-        selected: Bool
-    ) -> some View {
-
-        VStack(spacing: 4) {
-
-            Image(systemName: icon)
-                .font(.system(size: 22))
-
-            Text(title)
-                .font(.system(size: 10, weight: .bold))
-        }
-        .foregroundStyle(primaryText)
-        .frame(maxWidth: .infinity)
-        .frame(height: 56)
-        .background {
-
-            if selected {
-
-                Capsule()
-                    .fill(lightPurple.opacity(0.35))
-            }
         }
     }
 }
