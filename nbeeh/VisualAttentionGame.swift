@@ -1,11 +1,3 @@
-//
-//  VisualAttentionGame.swift
-//  nbeeh
-//
-//  Created by Monerah Almousa on 11/05/1448 AH.
-//
-
-
 import SwiftUI
 
 
@@ -176,8 +168,6 @@ struct VisualAttentionGame: View {
                 
                 newTiles.append(
                     GameTile(
-                        shape: secondShape,
-                        colorIndex: secondColor
                         shape: targetShape,
                         colorIndex: Int.random(in: 0...1)
                     )
@@ -322,106 +312,8 @@ struct VisualAttentionGame: View {
                         width: geometry.size.width,
                         height: geometry.size.height
                     )
-                )
-            }
-        }
-
-        boardTiles = newTiles.shuffled()
-
-        roundStart = Date()
-    }
-
-
-
-    private func selectShape(_ tile: GameTile) {
-
-        guard !isFinished else { return }
-
-        let elapsed = Date().timeIntervalSince(roundStart)
-        reactionTimes.append(elapsed)
-
-        if tile.shape == targetShape {
-
-            correctAnswers += 1
-            consecutiveErrors = 0
-
-            if elapsed <= 2.5 {
-                fastCorrectStreak += 1
-            } else {
-                fastCorrectStreak = 0
-            }
-
-            if fastCorrectStreak >= 2 {
-                difficultyLevel = min(difficultyLevel + 1, 8)
-                fastCorrectStreak = 0
-            }
-
-        } else {
-
-            totalErrors += 1
-            consecutiveErrors += 1
-            fastCorrectStreak = 0
-
-            if consecutiveErrors >= 2 {
-                difficultyLevel = max(difficultyLevel - 1, 0)
-                consecutiveErrors = 0
-            }
-        }
-
-        if roundNumber < 5 {
-
-            roundNumber += 1
-            generateChallenge()
-
-        } else {
-
-            isFinished = true
-
-            print("Session completed")
-            print("Correct answers: \(correctAnswers)")
-            print("Total errors: \(totalErrors)")
-            print("Reaction times: \(reactionTimes)")
-            print("Saved difficulty: \(difficultyLevel)")
-        }
-    }
-}
-
-
-private struct ShapeView: View {
-
-    let tile: GameTile
-
-    var body: some View {
-
-        GeometryReader { geometry in
-
-            let side = min(
-                geometry.size.width * 0.85,
-                geometry.size.height * 0.9
-            )
-
-            Group {
-
-                switch tile.shape {
-
-                case .circle:
-                    Circle()
-                        .fill(shapeColor)
-
-                case .triangle:
-                    Triangle()
-                        .fill(shapeColor)
-
-                case .square:
-                    Rectangle()
-                        .fill(shapeColor)
                 }
             }
-            .frame(width: side, height: side)
-            .frame(
-                width: geometry.size.width,
-                height: geometry.size.height
-            )
             
             private var shapeColor: Color {
                 tile.colorIndex == 0
@@ -460,43 +352,3 @@ private struct ShapeView: View {
                 VisualAttentionGame()
             }
         }
-    }
-
-    private var shapeColor: Color {
-        tile.colorIndex == 0
-            ? Color("botton")
-            : Color("mainBG")
-    }
-}
-
-
-private struct Triangle: Shape {
-
-    func path(in rect: CGRect) -> Path {
-
-        var path = Path()
-
-        path.move(
-            to: CGPoint(x: rect.midX, y: rect.minY)
-        )
-
-        path.addLine(
-            to: CGPoint(x: rect.maxX, y: rect.maxY)
-        )
-
-        path.addLine(
-            to: CGPoint(x: rect.minX, y: rect.maxY)
-        )
-
-        path.closeSubpath()
-
-        return path
-    }
-}
-
-#Preview {
-    NavigationStack {
-        VisualAttentionGame()
-    }
-}
-
