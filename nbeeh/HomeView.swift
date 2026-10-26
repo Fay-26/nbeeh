@@ -155,9 +155,6 @@ struct HomeView: View {
                     .padding(.bottom, 10)
             }
 
-            // شريط التنقل السفلي
-            CustomTabBar(selectedTab: $selectedTab)
-                .padding(.bottom, 10)
         }
       
     }
