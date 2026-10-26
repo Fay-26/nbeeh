@@ -1,79 +1,88 @@
+
+
 import SwiftUI
 
 struct VisualAttentionTask: View {
 
-    var body: some View {
-        ZStack {
-            Color("mainBG")
-                .ignoresSafeArea()
+    var body: some View {
 
-            VStack(spacing: 0) {
+        ZStack {
 
-                HStack {
-                    Button(action: {}) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 30))
-                            .foregroundStyle(.black)
-                            .frame(width: 52, height: 52)
-                            .background(Color("box"))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
+            Color("mainBG")
+                .ignoresSafeArea()
 
-                    Spacer()
-                }
-                .padding(.leading, 32)
-                .padding(.top, 20)
+            VStack(spacing: 0) {
 
-                Text("فنااان!")
-                    .font(.system(size: 64))
-                    .foregroundStyle(Color("textbig"))
-                    .padding(.top, 8)
+                HStack {
 
-                Text("خلصت من مهمة الإنتباه السمعي")
-                    .font(.system(size: 26))
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(Color("textsmall").opacity(0.8))
-                    .padding(.top, 28)
+                    Button(action: {}) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 30))
+                            .foregroundStyle(.black)
+                            .frame(width: 52, height: 52)
+                            .background(Color("box"))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
 
-                Spacer()
+                    Spacer()
+                }
+                .padding(.leading, 32)
+                .padding(.top, 20)
 
-                Image("smart")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 300, height: 250)
+                Text("فنااان!")
+                    .font(.system(size: 64))
+                    .foregroundStyle(Color("textbig"))
+                    .padding(.top, 8)
 
-                Text("وعشان تدرب تركيزك أكثر كمل اخر جزء من التحدي")
-                    .font(.system(size: 23))
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(Color("textsmall").opacity(0.8))
-                    .padding(.top, 55)
+                Text("خلصت من مهمة الإنتباه السمعي")
+                    .font(.system(size: 26))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Color("textsmall").opacity(0.8))
+                    .padding(.top, 28)
 
-                Spacer()
+                Spacer()
 
-                NavigationLink {
-                    VisualAttentionGame()
-                } label: {
-                    Text("مهمة الإنتباه البصري")
-                        .font(.system(size: 24))
-                        .foregroundStyle(Color("textbig"))
-                        .frame(width: 220, height: 70)
-                        .background(Color("botton"))
-                        .clipShape(
-                            RoundedRectangle(cornerRadius: 30)
-                        )
-                        .contentShape(
-                            RoundedRectangle(cornerRadius: 30)
-                        )
-                }
-                .buttonStyle(.plain)
-                .padding(.bottom, 45)
-            }
-        }
-        .preferredColorScheme(.dark)
-    }
+                Image("smart")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 250)
+
+                Text("وعشان تدرب تركيزك أكثر كمل اخر جزء من التحدي")
+                    .font(.system(size: 23))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Color("textsmall").opacity(0.8))
+                    .padding(.top, 55)
+
+                Spacer()
+
+                NavigationLink {
+                    VisualAttentionGame()
+                        .navigationBarBackButtonHidden(true)
+                } label: {
+                    Text("مهمة الانتباه البصري")
+                        .font(.system(size: 24))
+                        .foregroundStyle(Color("textbig"))
+                        .frame(width: 220, height: 70)
+                        .background(Color("botton"))
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 30)
+                        )
+                        .contentShape(
+                            RoundedRectangle(cornerRadius: 30)
+                        )
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 45)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .navigationBarBackButtonHidden(true)
+    }
 }
 
 #Preview {
-    VisualAttentionTask()
-       }
+    NavigationStack {
+        VisualAttentionTask()
+    }
+}
