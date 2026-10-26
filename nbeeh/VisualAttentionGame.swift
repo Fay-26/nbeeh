@@ -1,11 +1,3 @@
-//
-//  VisualAttentionGame.swift
-//  nbeeh
-//
-//  Created by Monerah Almousa on 11/05/1448 AH.
-//
-
-
 import SwiftUI
 private enum GameShape: CaseIterable {
     case circle
