@@ -1,4 +1,5 @@
 import SwiftUI
+
 struct VisualAttentionTask: View {
 
     var body: some View {
