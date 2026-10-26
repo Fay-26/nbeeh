@@ -49,7 +49,7 @@ struct CustomTabBar: View {
                 VStack(spacing: 4) {
                     Image(systemName: "house.fill")
                         .font(.system(size: 20))
-                    Text("الرئيسية")
+                    Text("الاساسيه")
                         .font(.system(size: 11))
                 }
                 .foregroundColor(selectedTab == .home ? Color("textbig") : Color("textsmall"))

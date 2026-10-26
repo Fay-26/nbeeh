@@ -119,7 +119,9 @@ struct QuizView: View {
     @State private var hasAnswered = false
     @State private var showExitAlert = false
     @State private var goToVisualTask = false
+    @State private var goToHome = false
 
+    
     private var questions: [QuizQuestion] {
         selectedStory?.questions ?? []
     }
@@ -157,12 +159,15 @@ struct QuizView: View {
         .navigationDestination(isPresented: $goToVisualTask) {
             VisualAttentionTask()
         }
+        .navigationDestination(isPresented: $goToHome) {
+            HomeView()
+        }
         .alert(
             "هل أنت متأكد من الخروج؟",
             isPresented: $showExitAlert
         ) {
             Button("تأكيد الخروج", role: .destructive) {
-                dismiss()
+                goToHome = true
             }
 
             Button("الاستمرار", role: .cancel) {}

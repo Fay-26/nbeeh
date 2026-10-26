@@ -62,6 +62,7 @@ struct LandingView2: View {
                 }
             }
         }
+        .environment(\.layoutDirection, .leftToRight)
     }
 }
 
