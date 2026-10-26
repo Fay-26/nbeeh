@@ -19,6 +19,7 @@ import CoreMotion
 struct  AudWalkTask: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showExitConfirmation = false
+    @State private var isTargetSoundPlaying = false
     @State private var heardCount = 0
     @State private var correctCount = 0
     @State private var incorrectCount = 0
@@ -146,16 +147,15 @@ struct  AudWalkTask: View {
 
         
             Button {
-                // بنضيف وظيفة الزر لاحقًا
                 heardCount += 1
-              
             } label: {
                 Text("سمعت")
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundStyle(.textbig)
                     .frame(width: 220, height: 70)
                     .background(
-                        Color.botton,in: RoundedRectangle(cornerRadius: 30)
+                        Color.botton,
+                        in: RoundedRectangle(cornerRadius: 30)
                     )
             }
             .padding(.top, 56)
@@ -168,6 +168,9 @@ struct  AudWalkTask: View {
             alignment: .top
         )
         .background(Color.taskBG)
+        
+        
+        
         
         .onAppear {
             startStepCounting()

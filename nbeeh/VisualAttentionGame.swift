@@ -372,5 +372,3 @@ private struct Triangle: Shape {
         VisualAttentionGame()
     }
 }
-
- 

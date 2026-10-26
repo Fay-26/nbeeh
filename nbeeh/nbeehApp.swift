@@ -1,5 +1,16 @@
 
+
+
 import SwiftUI
+import Combine
+
+final class AppNavigation: ObservableObject {
+    @Published var showHome = false
+
+    func goHome() {
+        showHome = true
+    }
+}
 
 @main
 struct nbeehApp: App {
@@ -15,10 +26,6 @@ struct nbeehApp: App {
                 LandingView()
             }
         }
-        WindowGroup {
-            NavigationStack {
-                VisualAttentionGame()
-            }
-        }
     }
 }
+
