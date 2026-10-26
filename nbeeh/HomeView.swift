@@ -10,6 +10,11 @@ import SwiftUI
 struct HomeView: View {
     @State private var selectedTab: Tab = .home
     
+    // متغيرات بيانات المستخدم الديناميكية
+    @State private var userLevel: Int = 2          // المستوى الحالي
+    @State private var userStreak: Int = 3         // الستريك الحالي (الأيام)
+    @State private var dailySteps: Int = 1000      // عدد خطوات تحدي اليوم
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             // خلفية الشاشة الأساسية
@@ -37,11 +42,13 @@ struct HomeView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 10)
                 
-                // المربعات العلوية
+                // المربعات العلوية (المستوى والستريك المتغيران)
                 HStack(spacing: 16) {
+                    // مربع المستوى
                     VStack(alignment: .trailing, spacing: 8) {
                         HStack {
-                            Text("المستوى 2")
+                            // عرض المستوى ديناميكياً
+                            Text("المستوى \(userLevel)")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(Color("textsmalldark"))
                             Image(systemName: "chart.bar.fill")
@@ -56,9 +63,11 @@ struct HomeView: View {
                     .background(Color("box"))
                     .cornerRadius(30)
                     
+                    // مربع الستريك
                     VStack(alignment: .trailing, spacing: 8) {
                         HStack {
-                            Text("3 أيام")
+                            // عرض عدد أيام الستريك ديناميكياً
+                            Text("\(userStreak) أيام")
                                 .font(.system(size: 18, weight: .bold))
                                 .foregroundColor(Color("textsmalldark"))
                             Image(systemName: "flame.fill")
@@ -93,15 +102,14 @@ struct HomeView: View {
                         .foregroundColor(Color("textsmall"))
                 }
                 
-                // بطاقة تحدي اليوم
-                
+                // بطاقة تحدي اليوم (عدد الخطوات الديناميكي)
                 VStack(alignment: .trailing, spacing: 20) {
                     HStack(alignment: .top) {
                         VStack(alignment: .trailing, spacing: 5) {
-                            Text("1,000 خطوة")
+                            // عرض الخطوات ديناميكياً مع تنسيق الرقم (مثل 1,200)
+                            Text("\(dailySteps.formatted()) خطوة")
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(Color("textsmalldark"))
-                            
                             
                             Text("امشِ ودَرّب\nانتباهك")
                                 .font(.system(size: 13, weight: .medium))
@@ -109,10 +117,8 @@ struct HomeView: View {
                                 .multilineTextAlignment(.trailing)
                         }
                         
-                      
                         
                         VStack(alignment: .trailing, spacing: 4) {
-                            
                             Image(systemName: "figure.walk")
                                 .font(.system(size: 20))
                                 .foregroundColor(Color("textsmall"))
