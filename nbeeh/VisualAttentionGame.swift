@@ -1,20 +1,14 @@
 import SwiftUI
-
-
 private enum GameShape: CaseIterable {
     case circle
     case triangle
     case square
 }
-
-
 private struct GameTile: Identifiable {
     let id = UUID()
     let shape: GameShape
     let colorIndex: Int
 }
-
-
 struct VisualAttentionGame: View {
     
     @Environment(\.dismiss) private var dismiss
@@ -45,7 +39,6 @@ struct VisualAttentionGame: View {
             ZStack {
                 Color("taskBG")
                     .ignoresSafeArea()
-
                 VStack(spacing: 0) {
                     HStack {
                         Button {
@@ -58,9 +51,7 @@ struct VisualAttentionGame: View {
                                 .background(Color("box"), in: Circle())
                         }
                         .buttonStyle(.plain)
-
                         Spacer()
-
                         Text("تحدي الانتباه البصري")
                             .font(.system(size: 25, weight: .semibold))
                             .foregroundStyle(Color("mainBG"))
@@ -70,21 +61,16 @@ struct VisualAttentionGame: View {
                                 Color("box"),
                                 in: RoundedRectangle(cornerRadius: 20)
                             )
-
                         Spacer()
-
                         Image(systemName: "eye")
                             .font(.system(size: 35, weight: .semibold))
                             .foregroundStyle(Color("box"))
                     }
                     .padding(.horizontal, 18)
                     .padding(.top, 16)
-
                     Spacer(minLength: 18)
-
                     ZStack {
                         Color.white
-
                         if isFinished {
                             Button {
                                 showResults = true
@@ -119,7 +105,6 @@ struct VisualAttentionGame: View {
                     .frame(height: 580)
                     .clipShape(RoundedRectangle(cornerRadius: 50))
                     .padding(.horizontal, 30)
-
                     Spacer(minLength: 18)
                 }
             }
@@ -137,7 +122,6 @@ struct VisualAttentionGame: View {
                 startSession()
             }
         }
-
             
             
             private func startSession() {
