@@ -5,6 +5,7 @@
 //  Created by Fay Alabdulqader on 21/10/2026.
 //
 
+
 import SwiftUI
 
 enum Tab {
@@ -13,53 +14,81 @@ enum Tab {
 
 struct CustomTabBar: View {
     @Binding var selectedTab: Tab
-    
+
     var body: some View {
         HStack {
             Spacer()
-            
-            // زر الأداء
-            Button(action: { selectedTab = .performance }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.system(size: 20))
-                    Text("الاداء")
-                        .font(.system(size: 11))
-                }
-                .foregroundColor(selectedTab == .performance ? Color("textbig") : Color("textsmall"))
+
+            // Performance
+            NavigationLink {
+                WeeklyPerformanceView()
+            } label: {
+                tabItem(
+                    title: "الأداء",
+                    icon: "chart.bar.fill",
+                    tab: .performance
+                )
             }
-            
+            .buttonStyle(.plain)
+
             Spacer()
-            
-            // زر المراحل
-            Button(action: { selectedTab = .levels }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "flag.fill")
-                        .font(.system(size: 20))
-                    Text("المراحل")
-                        .font(.system(size: 11))
-                }
-                .foregroundColor(selectedTab == .levels ? Color("textbig") : Color("textsmall"))
+
+            // Stages
+            NavigationLink {
+                MapView()
+            } label: {
+                tabItem(
+                    title: "المراحل",
+                    icon: "point.topleft.down.curvedto.point.bottomright.up",
+                    tab: .levels
+                )
             }
-            
+            .buttonStyle(.plain)
+
             Spacer()
-            
-            // زر الرئيسية
-            Button(action: { selectedTab = .home }) {
-                VStack(spacing: 4) {
-                    Image(systemName: "house.fill")
-                        .font(.system(size: 20))
-                    Text("الاساسيه")
-                        .font(.system(size: 11))
-                }
-                .foregroundColor(selectedTab == .home ? Color("textbig") : Color("textsmall"))
+
+            // Home
+            NavigationLink {
+                HomeView()
+            } label: {
+                tabItem(
+                    title: "الرئيسية",
+                    icon: "house.fill",
+                    tab: .home
+                )
             }
-            
+            .buttonStyle(.plain)
+
             Spacer()
         }
         .padding(.vertical, 14)
         .background(Color("taskBG"))
         .cornerRadius(30)
         .padding(.horizontal, 24)
+    }
+
+    private func tabItem(
+        title: String,
+        icon: String,
+        tab: Tab
+    ) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+
+            Text(title)
+                .font(.system(size: 11))
+        }
+        .foregroundColor(
+            selectedTab == tab
+            ? Color("textbig")
+            : Color("textsmall")
+        )
+    }
+}
+
+#Preview {
+    NavigationStack {
+        CustomTabBar(selectedTab: .constant(.home))
     }
 }
