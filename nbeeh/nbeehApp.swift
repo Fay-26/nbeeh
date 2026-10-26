@@ -26,7 +26,6 @@ struct nbeehApp: App {
                 LandingView()
             }
         }
-<<<<<<< HEAD
         WindowGroup {
             NavigationStack {
                 VisualAttentionGame()
@@ -52,8 +51,6 @@ struct nbeehApp: App {
                 HomeView()
             }
         }
-=======
->>>>>>> main
     }
 }
 
