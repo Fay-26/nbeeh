@@ -16,39 +16,31 @@
 import SwiftUI
 import CoreMotion
 
-struct AudWalkTask: View {
-
+struct  AudWalkTask: View {
     @Environment(\.dismiss) private var dismiss
-
     @State private var showExitConfirmation = false
     @State private var isTargetSoundPlaying = false
     @State private var heardCount = 0
     @State private var correctCount = 0
     @State private var incorrectCount = 0
     @State private var remainingSteps = 1000
-
     private let pedometer = CMPedometer()
-
+    private let startDate = Date()
+    
     private func startStepCounting() {
-
         guard CMPedometer.isStepCountingAvailable() else {
             return
         }
 
         remainingSteps = 1000
 
-        let startDate = Date()
-
         pedometer.startUpdates(from: startDate) { data, error in
-
             guard let data = data, error == nil else {
                 return
             }
 
             DispatchQueue.main.async {
-
                 let stepsWalked = data.numberOfSteps.intValue
-
                 remainingSteps = max(0, 1000 - stepsWalked)
 
                 if remainingSteps == 0 {
@@ -57,15 +49,16 @@ struct AudWalkTask: View {
             }
         }
     }
-
+    
+    
     var body: some View {
-
         VStack(spacing: 0) {
 
             // الهيدر
             HStack {
-
+               
                 Button {
+                    // زر الاكس لما اضغطه يطلع صفحة تأكيد الخروج
                     showExitConfirmation = true
                 } label: {
                     Image(systemName: "xmark")
@@ -74,6 +67,7 @@ struct AudWalkTask: View {
                         .frame(width: 48, height: 48)
                         .background(Color.box, in: Circle())
                 }
+
 
                 Spacer()
 
@@ -96,9 +90,12 @@ struct AudWalkTask: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 8)
 
+          
+          
             // عنوان المهمة
             VStack(spacing: 10) {
 
+                // مهمتك: جهة اليمين
                 HStack {
                     Spacer()
 
@@ -107,11 +104,13 @@ struct AudWalkTask: View {
                         .foregroundStyle(.textbig)
                 }
 
+                // العنوان بالنص
                 Text("انتبه لصوت العصفور")
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundStyle(.textbig)
                     .frame(maxWidth: .infinity, alignment: .center)
 
+                // التعليمات بالنص وبخط أصغر
                 Text("لما تسمع صوت العصفور اضغط الزر")
                     .font(.system(size: 12, weight: .regular))
                     .foregroundStyle(.textbig)
@@ -120,10 +119,8 @@ struct AudWalkTask: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 80)
             .padding(.horizontal, 8)
-
             // عداد الخطوات
             VStack(spacing: 8) {
-
                 Text("\(remainingSteps)")
                     .font(.system(size: 68, weight: .bold))
                     .foregroundStyle(.mainBG)
@@ -133,11 +130,13 @@ struct AudWalkTask: View {
                     .foregroundStyle(.mainBG)
             }
             .frame(width: 277, height: 209)
+            
             .overlay(alignment: .topTrailing) {
                 Image(systemName: "arrowshape.down")
                     .font(.system(size: 40, weight: .medium))
                     .foregroundStyle(.mainBG)
                     .padding(16)
+                    
             }
             .background(
                 Color.box,
@@ -146,7 +145,7 @@ struct AudWalkTask: View {
             .padding(.top, 48)
             .frame(maxWidth: .infinity)
 
-            // زر سمعت
+        
             Button {
                 heardCount += 1
             } label: {
@@ -169,31 +168,34 @@ struct AudWalkTask: View {
             alignment: .top
         )
         .background(Color.taskBG)
-
-        // بدء عد الخطوات عند فتح الصفحة
+        
+        
+        
+        
         .onAppear {
             startStepCounting()
         }
-
-        // إيقاف العد عند مغادرة الصفحة
         .onDisappear {
             pedometer.stopUpdates()
         }
-
-        // تأكيد الخروج
+        
+    
+        
+        
         .alert("هل انت متأكد من الخروج", isPresented: $showExitConfirmation) {
-
             Button("الاستمرار", role: .cancel) {
             }
 
             Button("تأكيد الخروج", role: .destructive) {
                 dismiss()
             }
-
         } message: {
             Text("الخروج يؤدي إلى اعادة المرحلة من جديد")
         }
+
     }
+     
+       
 }
 
 #Preview {
