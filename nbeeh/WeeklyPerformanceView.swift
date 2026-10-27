@@ -12,6 +12,12 @@ struct WeeklyPerformanceView: View {
 
     @State private var selectedTab: Tab = .performance
 
+    // MARK: - Saved Data
+
+    @ObservedObject private var store = PerformanceStore.shared
+
+    @State private var today = Date()
+
     // MARK: - Colors
 
     private let backgroundColor = Color("mainBG")
@@ -22,27 +28,98 @@ struct WeeklyPerformanceView: View {
     private let secondaryText = Color("textsmall")
     private let darkText = Color("textsmalldark")
 
-    // MARK: - Data
+    // MARK: - Weekly Data
 
-    private let weeklyData: [(day: String, accuracy: Double?)] = [
-        ("الأحد", 65),
-        ("الاثنين", 60),
-        ("الثلاثاء", 55),
-        ("الأربعاء", 63),
-        ("الخميس", 58),
-        ("الجمعة", nil),
-        ("السبت", nil)
+    private let dayNames = [
+        "الأحد",
+        "الاثنين",
+        "الثلاثاء",
+        "الأربعاء",
+        "الخميس",
+        "الجمعة",
+        "السبت"
     ]
 
-    private let completedDays = [
-        true, true, true, true, true, false, false
-    ]
+    private var weekDates: [Date] {
 
-    private let steps = 3000
-    private let weeklyAccuracy = 60
+        var calendar = Calendar.current
+        calendar.firstWeekday = 1
+
+        guard let interval = calendar.dateInterval(
+            of: .weekOfYear,
+            for: today
+        ) else {
+            return []
+        }
+
+        return (0..<7).compactMap {
+            calendar.date(
+                byAdding: .day,
+                value: $0,
+                to: interval.start
+            )
+        }
+    }
+
+    private var weeklySessions: [DailyPerformance] {
+        weekDates.compactMap { date in
+            guard let session = store.session(on: date),
+                  session.isCompleted else {
+                return nil
+            }
+
+            return session
+        }
+    }
+
+    private var weeklyData: [(day: String, accuracy: Double?)] {
+
+        weekDates.enumerated().map { index, date in
+
+            let session = store.session(on: date)
+
+            let accuracy = session?.isCompleted == true
+                ? session?.accuracy
+                : nil
+
+            return (
+                day: dayNames[index],
+                accuracy: accuracy
+            )
+        }
+    }
+
+    private var completedDays: [Bool] {
+        weekDates.map { date in
+            store.session(on: date)?.isCompleted == true
+        }
+    }
 
     private var completedCount: Int {
         completedDays.filter { $0 }.count
+    }
+
+    private var steps: Int {
+        weeklySessions.reduce(0) {
+            $0 + $1.steps
+        }
+    }
+
+    private var weeklyAccuracy: Double? {
+
+        let correct = weeklySessions.reduce(0) {
+            $0 + $1.totalCorrect
+        }
+
+        let attempts = weeklySessions.reduce(0) {
+            $0 + $1.totalAttempts
+        }
+
+        guard attempts > 0 else {
+            return nil
+        }
+
+        return Double(correct) / Double(attempts) * 100
     }
 
     // MARK: - Main View
@@ -56,43 +133,61 @@ struct WeeklyPerformanceView: View {
                 let screenWidth = geometry.size.width
                 let screenHeight = geometry.size.height
 
-                let contentWidth = min(332, screenWidth - 48)
-                let verticalScale = min(1, screenHeight / 780)
+                let contentWidth = min(
+                    332,
+                    screenWidth - 48
+                )
+
+                let verticalScale = min(
+                    1,
+                    screenHeight / 780
+                )
 
                 ZStack {
 
                     backgroundColor
                         .ignoresSafeArea()
 
-                    VStack(spacing: 0) {
+                    ScrollView(showsIndicators: false) {
 
-                        stepsCard
-                            .frame(
-                                maxWidth: .infinity,
-                                alignment: .trailing
-                            )
-                            .padding(.top, 28)
+                        VStack(spacing: 0) {
 
-                        performanceTitle
-                            .padding(.top, 64 * verticalScale)
+                            stepsCard
+                                .frame(
+                                    maxWidth: .infinity,
+                                    alignment: .trailing
+                                )
+                                .padding(.top, 28)
 
-                        weeklyChart
-                            .padding(.top, 24 * verticalScale)
+                            performanceTitle
+                                .padding(
+                                    .top,
+                                    64 * verticalScale
+                                )
 
-                        completedChallengesCard
-                            .padding(.top, 44 * verticalScale)
+                            weeklyChart
+                                .padding(
+                                    .top,
+                                    24 * verticalScale
+                                )
 
-                        attentionAccuracyCard
-                            .padding(.top, 28 * verticalScale)
+                            completedChallengesCard
+                                .padding(
+                                    .top,
+                                    44 * verticalScale
+                                )
 
-                        Spacer(minLength: 8)
+                            attentionAccuracyCard
+                                .padding(
+                                    .top,
+                                    28 * verticalScale
+                                )
+
+                            Spacer(minLength: 20)
+                        }
+                        .frame(width: contentWidth)
+                        .frame(maxWidth: .infinity)
                     }
-                    .frame(width: contentWidth)
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity,
-                        alignment: .top
-                    )
                 }
             }
 
@@ -105,6 +200,9 @@ struct WeeklyPerformanceView: View {
             }
 
             .toolbar(.hidden, for: .navigationBar)
+        }
+        .onAppear {
+            today = Date()
         }
 
         // MARK: - Navigation Destinations
@@ -146,11 +244,21 @@ struct WeeklyPerformanceView: View {
 
             VStack(alignment: .trailing, spacing: 0) {
 
-                Text("\(steps)")
-                    .font(.system(size: 24, weight: .bold))
+                Text(steps.formatted())
+                    .font(
+                        .system(
+                            size: 24,
+                            weight: .bold
+                        )
+                    )
 
-                Text("خطواتك")
-                    .font(.system(size: 11, weight: .semibold))
+                Text("خطواتك هذا الأسبوع")
+                    .font(
+                        .system(
+                            size: 11,
+                            weight: .semibold
+                        )
+                    )
             }
             .foregroundStyle(primaryText)
 
@@ -160,7 +268,10 @@ struct WeeklyPerformanceView: View {
                 .frame(width: 48, height: 48)
                 .overlay {
                     Circle()
-                        .stroke(purple, lineWidth: 3)
+                        .stroke(
+                            purple,
+                            lineWidth: 3
+                        )
                 }
         }
         .padding(.leading, 4)
@@ -182,8 +293,13 @@ struct WeeklyPerformanceView: View {
 
         HStack(alignment: .top, spacing: 4) {
 
-            Text("أدائك هذا الأسبوع")
-                .font(.system(size: 28, weight: .bold))
+            Text("أداؤك هذا الأسبوع")
+                .font(
+                    .system(
+                        size: 28,
+                        weight: .bold
+                    )
+                )
                 .foregroundStyle(primaryText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -217,22 +333,29 @@ struct WeeklyPerformanceView: View {
 
                                 if let accuracy = item.accuracy {
 
-                                    Text("\(Int(accuracy))%")
-                                        .font(
-                                            .system(
-                                                size: 10,
-                                                weight: .semibold
-                                            )
+                                    Text(
+                                        "\(Int(accuracy.rounded()))%"
+                                    )
+                                    .font(
+                                        .system(
+                                            size: 10,
+                                            weight: .semibold
                                         )
-                                        .foregroundStyle(primaryText)
-                                        .padding(.top, 4)
+                                    )
+                                    .foregroundStyle(primaryText)
+                                    .padding(.top, 4)
                                 }
                             }
                             .frame(
                                 height: item.accuracy == nil
                                 ? 4
-                                : chartGeometry.size.height *
-                                  CGFloat(item.accuracy ?? 0) / 100
+                                : max(
+                                    4,
+                                    chartGeometry.size.height *
+                                    CGFloat(
+                                        item.accuracy ?? 0
+                                    ) / 100
+                                )
                             )
                         }
                         .frame(maxWidth: .infinity)
@@ -276,7 +399,7 @@ struct WeeklyPerformanceView: View {
                 .rightToLeft
             )
         }
-        .frame(width: 332)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Completed Challenges
@@ -288,12 +411,22 @@ struct WeeklyPerformanceView: View {
             HStack {
 
                 Text("\(completedCount)/7")
-                    .font(.system(size: 15, weight: .bold))
+                    .font(
+                        .system(
+                            size: 15,
+                            weight: .bold
+                        )
+                    )
 
                 Spacer()
 
                 Text("التحديات المكتملة")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(
+                        .system(
+                            size: 16,
+                            weight: .bold
+                        )
+                    )
             }
             .foregroundStyle(primaryText)
 
@@ -307,7 +440,7 @@ struct WeeklyPerformanceView: View {
                     Image(
                         systemName: completed
                         ? "checkmark"
-                        : "xmark"
+                        : "minus"
                     )
                     .font(.system(size: 14))
                     .foregroundStyle(darkText)
@@ -335,12 +468,16 @@ struct WeeklyPerformanceView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .frame(width: 332, height: 96)
+        .frame(maxWidth: .infinity)
+        .frame(height: 96)
         .background {
 
             RoundedRectangle(cornerRadius: 20)
                 .fill(cardColor)
-                .stroke(primaryText, lineWidth: 1)
+                .stroke(
+                    primaryText,
+                    lineWidth: 1
+                )
         }
     }
 
@@ -355,7 +492,12 @@ struct WeeklyPerformanceView: View {
             VStack(alignment: .trailing, spacing: 4) {
 
                 Text("دقة الانتباه")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(
+                        .system(
+                            size: 16,
+                            weight: .bold
+                        )
+                    )
 
                 Text("نسبة الاستجابات الصحيحة أثناء التحديات")
                     .font(.system(size: 10))
@@ -378,7 +520,9 @@ struct WeeklyPerformanceView: View {
                 Circle()
                     .trim(
                         from: 0,
-                        to: CGFloat(weeklyAccuracy) / 100
+                        to: CGFloat(
+                            weeklyAccuracy ?? 0
+                        ) / 100
                     )
                     .stroke(
                         purple,
@@ -389,19 +533,32 @@ struct WeeklyPerformanceView: View {
                     )
                     .rotationEffect(.degrees(-90))
 
-                Text("\(weeklyAccuracy)%")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(primaryText)
+                Text(
+                    weeklyAccuracy.map {
+                        "\(Int($0.rounded()))%"
+                    } ?? "—"
+                )
+                .font(
+                    .system(
+                        size: 15,
+                        weight: .bold
+                    )
+                )
+                .foregroundStyle(primaryText)
             }
             .frame(width: 64, height: 64)
         }
         .padding(.horizontal, 12)
-        .frame(width: 332, height: 96)
+        .frame(maxWidth: .infinity)
+        .frame(height: 96)
         .background {
 
             RoundedRectangle(cornerRadius: 20)
                 .fill(cardColor)
-                .stroke(primaryText, lineWidth: 1)
+                .stroke(
+                    primaryText,
+                    lineWidth: 1
+                )
         }
     }
 }

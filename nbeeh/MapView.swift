@@ -11,53 +11,38 @@ struct MapView: View {
     // MARK: - Navigation
 
     @State private var selectedTab: Tab = .levels
+    @State private var selectedLevel: Int?
 
-    // MARK: - Design Size
+    // MARK: - Identity Colors
 
-    private let designWidth: CGFloat = 402
-    private let designHeight: CGFloat = 874
+    private let bg = Color("mainBG")
+    private let surface = Color("taskBG")
+    private let soft = Color("box")
+    private let accent = Color("botton")
+    private let textPrimary = Color("textbig")
+    private let textSecondary = Color("textsmall")
+    private let textDark = Color("textsmalldark")
 
-    // MARK: - Colors
+    // MARK: - Progress Data
 
-    private let backgroundColor = Color("mainBG")
+    // Temporary values until connected to user progress
+    private let currentLevel = 2
+    private let totalLevels = 7
 
-    private let stageColor = Color(
-        red: 0.49,
-        green: 0.36,
-        blue: 0.51
-    )
+    // MARK: - Map Dimensions
 
-    private let roadColor = Color(
-        red: 0.77,
-        green: 0.67,
-        blue: 0.79
-    )
+    private let mapHeight: CGFloat = 680
 
-    private let firstStageColor = Color(
-        red: 0.91,
-        green: 0.90,
-        blue: 0.92
-    )
+    // Positions from bottom (level 1) to top (level 7)
 
-    private let sparkleColor = Color(
-        red: 1.0,
-        green: 0.85,
-        blue: 0.20
-    )
-
-    // MARK: - Stage Positions
-
-    // مواقع المراحل من الأسفل للأعلى
-    // المسافة الرأسية ثابتة: 90 نقطة
-
-    private let stagePositions: [CGPoint] = [
-        CGPoint(x: 182, y: 705), // Stage 1
-        CGPoint(x: 268, y: 615), // Stage 2
-        CGPoint(x: 145, y: 525), // Stage 3
-        CGPoint(x: 245, y: 435), // Stage 4
-        CGPoint(x: 185, y: 345), // Stage 5
-        CGPoint(x: 278, y: 255), // Stage 6
-        CGPoint(x: 214, y: 165)  // Stage 7
+    private let stops: [CGPoint] = [
+        CGPoint(x: 0.28, y: 0.91), // Level 1
+        CGPoint(x: 0.72, y: 0.78), // Level 2
+        CGPoint(x: 0.28, y: 0.65), // Level 3
+        CGPoint(x: 0.72, y: 0.52), // Level 4
+        CGPoint(x: 0.28, y: 0.39), // Level 5
+        CGPoint(x: 0.72, y: 0.26), // Level 6
+        CGPoint(x: 0.40, y: 0.13)  // Level 7
     ]
 
     // MARK: - Main View
@@ -66,88 +51,54 @@ struct MapView: View {
 
         NavigationStack {
 
-            GeometryReader { geometry in
+            ZStack {
 
-                let scale = min(
-                    geometry.size.width / designWidth,
-                    geometry.size.height / designHeight
-                )
+                bg
+                    .ignoresSafeArea()
 
-                let scaledWidth = designWidth * scale
-                let scaledHeight = designHeight * scale
+                ScrollView(showsIndicators: false) {
 
-                ZStack {
+                    VStack(spacing: 0) {
 
-                    backgroundColor
-                        .ignoresSafeArea()
+                        // MARK: Header
 
-                    ZStack(alignment: .topLeading) {
+                        HStack {
 
-                        // 1. Bottom Decorations
+                            Text("7 مستويات")
+                                .font(
+                                    .system(
+                                        size: 12,
+                                        weight: .medium
+                                    )
+                                )
+                                .foregroundStyle(textSecondary)
 
-                        bottomDecorations
+                            Spacer()
 
-                        // 2. Background Stars
-
-                        starsLayer
-
-                        // 3. Curved Road
-
-                        SmoothStageRoad(
-                            points: stagePositions
-                        )
-                        .stroke(
-                            roadColor,
-                            style: StrokeStyle(
-                                lineWidth: 34,
-                                lineCap: .round,
-                                lineJoin: .round
-                            )
-                        )
-                        .frame(
-                            width: designWidth,
-                            height: designHeight
-                        )
-
-                        // 4. Stages
-
-                        ForEach(1...7, id: \.self) { number in
-
-                            let point = stagePositions[number - 1]
-
-                            stage(
-                                number,
-                                x: point.x,
-                                y: point.y
-                            )
+                            Text("خريطة المستويات")
+                                .font(
+                                    .system(
+                                        size: 24,
+                                        weight: .bold
+                                    )
+                                )
+                                .foregroundStyle(textPrimary)
                         }
+                        .padding(.top, 12)
 
-                        // 5. Unlocked Stage Sparkles
+                        // MARK: Map
 
-                        unlockedStageSparkles
+                        mapSection
+                            .padding(.top, 4)
                     }
-                    .frame(
-                        width: designWidth,
-                        height: designHeight
-                    )
-                    .scaleEffect(
-                        scale,
-                        anchor: .topLeading
-                    )
-                    .frame(
-                        width: scaledWidth,
-                        height: scaledHeight,
-                        alignment: .topLeading
-                    )
+                    .frame(maxWidth: 430)
+                    .padding(.horizontal, 22)
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(
-                    width: geometry.size.width,
-                    height: geometry.size.height
-                )
             }
 
             // MARK: - Custom Tab Bar
-            // نفس طريقة صفحة الأداء
+            // Unchanged
 
             .safeAreaInset(edge: .bottom, spacing: 0) {
 
@@ -162,7 +113,9 @@ struct MapView: View {
 
         .fullScreenCover(
             isPresented: Binding(
-                get: { selectedTab == .home },
+                get: {
+                    selectedTab == .home
+                },
                 set: {
                     if !$0 {
                         selectedTab = .levels
@@ -175,7 +128,9 @@ struct MapView: View {
 
         .fullScreenCover(
             isPresented: Binding(
-                get: { selectedTab == .performance },
+                get: {
+                    selectedTab == .performance
+                },
                 set: {
                     if !$0 {
                         selectedTab = .levels
@@ -185,30 +140,167 @@ struct MapView: View {
         ) {
             WeeklyPerformanceView()
         }
-    }
 
-    // MARK: - Smooth Road
+        // MARK: - Level Selection
 
-    private struct SmoothStageRoad: Shape {
+        .alert(
+            "المستوى \(selectedLevel ?? 1)",
+            isPresented: Binding(
+                get: {
+                    selectedLevel != nil
+                },
+                set: {
+                    if !$0 {
+                        selectedLevel = nil
+                    }
+                }
+            )
+        ) {
 
-        let points: [CGPoint]
-
-        func path(in rect: CGRect) -> Path {
-
-            var path = Path()
-
-            guard let firstPoint = points.first else {
-                return path
+            Button("حسنًا", role: .cancel) {
+                selectedLevel = nil
             }
 
-            path.move(to: firstPoint)
+        } message: {
 
-            for index in 0..<(points.count - 1) {
+            Text("سيتم ربط هذه المحطة بالتحدي الخاص بها.")
+        }
+    }
 
-                let start = points[index]
-                let end = points[index + 1]
+    // MARK: - Map Section
 
-                let middleY = (start.y + end.y) / 2
+    private var mapSection: some View {
+
+        GeometryReader { geometry in
+
+            let width = geometry.size.width
+
+            ZStack {
+
+                // MARK: Base Route
+
+                routePath(
+                    in: CGSize(
+                        width: width,
+                        height: mapHeight
+                    )
+                )
+                .stroke(
+                    soft.opacity(0.22),
+                    style: StrokeStyle(
+                        lineWidth: 23,
+                        lineCap: .round,
+                        lineJoin: .round
+                    )
+                )
+
+                // MARK: Inner Route
+
+                routePath(
+                    in: CGSize(
+                        width: width,
+                        height: mapHeight
+                    )
+                )
+                .stroke(
+                    soft.opacity(0.7),
+                    style: StrokeStyle(
+                        lineWidth: 13,
+                        lineCap: .round,
+                        lineJoin: .round
+                    )
+                )
+
+                // MARK: Completed Route
+
+                completedRoute(
+                    in: CGSize(
+                        width: width,
+                        height: mapHeight
+                    )
+                )
+                .stroke(
+                    accent,
+                    style: StrokeStyle(
+                        lineWidth: 13,
+                        lineCap: .round,
+                        lineJoin: .round
+                    )
+                )
+
+                // MARK: Stations
+
+                ForEach(
+                    1...totalLevels,
+                    id: \.self
+                ) { level in
+
+                    let point = stops[level - 1]
+
+                    station(level)
+                        .position(
+                            x: width * point.x,
+                            y: mapHeight * point.y
+                        )
+                }
+
+                // MARK: Destination Flag
+
+                Image(systemName: "flag.checkered")
+                    .font(
+                        .system(
+                            size: 21,
+                            weight: .medium
+                        )
+                    )
+                    .foregroundStyle(textPrimary)
+                    .position(
+                        x: width * 0.40,
+                        y: mapHeight * 0.045
+                    )
+            }
+            .frame(
+                width: width,
+                height: mapHeight
+            )
+        }
+        .frame(height: mapHeight)
+    }
+
+    // MARK: - Route Drawing
+
+    private func routePath(
+        in size: CGSize
+    ) -> Path {
+
+        Path { path in
+
+            guard let first = stops.first else {
+                return
+            }
+
+            path.move(
+                to: CGPoint(
+                    x: first.x * size.width,
+                    y: first.y * size.height
+                )
+            )
+
+            for index in 0..<(stops.count - 1) {
+
+                let start = CGPoint(
+                    x: stops[index].x * size.width,
+                    y: stops[index].y * size.height
+                )
+
+                let end = CGPoint(
+                    x: stops[index + 1].x * size.width,
+                    y: stops[index + 1].y * size.height
+                )
+
+                let middleY = (
+                    start.y + end.y
+                ) / 2
 
                 path.addCurve(
                     to: end,
@@ -222,232 +314,225 @@ struct MapView: View {
                     )
                 )
             }
-
-            return path
         }
     }
 
-    // MARK: - Stage Circles
+    // MARK: - Completed Route
 
-    private func stage(
-        _ number: Int,
-        x: CGFloat,
-        y: CGFloat
-    ) -> some View {
+    private func completedRoute(
+        in size: CGSize
+    ) -> Path {
 
-        let unlocked = number == 1
+        Path { path in
 
-        return ZStack {
+            guard currentLevel > 1 else {
+                return
+            }
 
-            Ellipse()
-                .fill(
-                    unlocked
-                    ? firstStageColor
-                    : stageColor
+            let first = stops[0]
+
+            path.move(
+                to: CGPoint(
+                    x: first.x * size.width,
+                    y: first.y * size.height
+                )
+            )
+
+            let lastCompletedSegment = min(
+                currentLevel,
+                totalLevels
+            ) - 1
+
+            for index in 0..<lastCompletedSegment {
+
+                let start = CGPoint(
+                    x: stops[index].x * size.width,
+                    y: stops[index].y * size.height
                 )
 
-            Text("\(number)")
-                .font(
-                    .system(
-                        size: 32,
-                        weight: .medium
+                let end = CGPoint(
+                    x: stops[index + 1].x * size.width,
+                    y: stops[index + 1].y * size.height
+                )
+
+                let middleY = (
+                    start.y + end.y
+                ) / 2
+
+                path.addCurve(
+                    to: end,
+                    control1: CGPoint(
+                        x: start.x,
+                        y: middleY
+                    ),
+                    control2: CGPoint(
+                        x: end.x,
+                        y: middleY
                     )
                 )
-                .foregroundStyle(
-                    unlocked
-                    ? stageColor
-                    : .white
-                )
-                .offset(y: 5)
-
-            if !unlocked {
-
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 17))
-                    .foregroundStyle(
-                        Color.white.opacity(0.9)
-                    )
-                    .offset(
-                        x: -25,
-                        y: -22
-                    )
             }
         }
-        .frame(
-            width: 77,
-            height: 73
-        )
-        .position(
-            x: x,
-            y: y
-        )
     }
 
-    // MARK: - Unlocked Stage Sparkles
+    // MARK: - Station
 
-    private var unlockedStageSparkles: some View {
-
-        ZStack(alignment: .topLeading) {
-
-            Image(systemName: "sparkles")
-                .font(
-                    .system(
-                        size: 34,
-                        weight: .bold
-                    )
-                )
-                .foregroundStyle(sparkleColor)
-                .position(
-                    x: 144,
-                    y: 670
-                )
-
-            Image(systemName: "sparkles")
-                .font(
-                    .system(
-                        size: 30,
-                        weight: .bold
-                    )
-                )
-                .foregroundStyle(sparkleColor)
-                .position(
-                    x: 218,
-                    y: 733
-                )
-        }
-        .frame(
-            width: designWidth,
-            height: designHeight
-        )
-    }
-
-    // MARK: - Background Stars
-
-    private var starsLayer: some View {
-
-        ZStack(alignment: .topLeading) {
-
-            star(x: 40, y: 150, size: 11, color: .blue)
-            star(x: 110, y: 170, size: 8, color: .gray)
-            star(x: 190, y: 95, size: 9, color: .yellow)
-            star(x: 365, y: 95, size: 17, color: .yellow)
-            star(x: 335, y: 70, size: 13, color: .mint)
-            star(x: 320, y: 175, size: 9, color: .gray)
-            star(x: 355, y: 210, size: 12, color: .pink)
-            star(x: 255, y: 180, size: 13, color: .mint)
-
-            star(x: 25, y: 295, size: 14, color: .mint)
-            star(x: 370, y: 330, size: 17, color: .yellow)
-            star(x: 60, y: 380, size: 10, color: .pink)
-            star(x: 220, y: 325, size: 15, color: .mint)
-
-            star(x: 45, y: 490, size: 18, color: .yellow)
-            star(x: 360, y: 490, size: 11, color: .blue)
-
-            star(x: 30, y: 590, size: 9, color: .blue)
-            star(x: 55, y: 640, size: 11, color: .mint)
-            star(x: 275, y: 580, size: 12, color: .yellow)
-
-            star(x: 75, y: 765, size: 10, color: .gray)
-            star(x: 360, y: 720, size: 11, color: .blue)
-            star(x: 350, y: 805, size: 17, color: .yellow)
-            star(x: 55, y: 820, size: 10, color: .mint)
-        }
-        .frame(
-            width: designWidth,
-            height: designHeight
-        )
-    }
-
-    private func star(
-        x: CGFloat,
-        y: CGFloat,
-        size: CGFloat,
-        color: Color
+    private func station(
+        _ level: Int
     ) -> some View {
 
-        Image(systemName: "star.fill")
-            .font(.system(size: size))
-            .foregroundStyle(
-                color.opacity(0.75)
+        let completed = level < currentLevel
+        let current = level == currentLevel
+        let locked = level > currentLevel
+
+        return Button {
+
+            if !locked {
+                selectedLevel = level
+            }
+
+        } label: {
+
+            VStack(spacing: 7) {
+
+                ZStack {
+
+                    // Current Level Highlight
+
+                    if current {
+
+                        Circle()
+                            .stroke(
+                                accent.opacity(0.28),
+                                lineWidth: 9
+                            )
+                            .frame(
+                                width: 91,
+                                height: 91
+                            )
+                    }
+
+                    // Station Background
+
+                    Circle()
+                        .fill(
+                            current
+                            ? accent
+                            : completed
+                            ? soft
+                            : surface
+                        )
+                        .frame(
+                            width: current ? 72 : 60,
+                            height: current ? 72 : 60
+                        )
+
+                    // Station Border
+
+                    Circle()
+                        .stroke(
+                            current
+                            ? textPrimary.opacity(0.65)
+                            : soft.opacity(0.8),
+                            lineWidth: 2
+                        )
+                        .frame(
+                            width: current ? 72 : 60,
+                            height: current ? 72 : 60
+                        )
+
+                    // Station Content
+
+                    if completed {
+
+                        Image(
+                            systemName: "checkmark"
+                        )
+                        .font(
+                            .system(
+                                size: 25,
+                                weight: .bold
+                            )
+                        )
+                        .foregroundStyle(textDark)
+
+                    } else if locked {
+
+                        Image(
+                            systemName: "lock.fill"
+                        )
+                        .font(
+                            .system(size: 18)
+                        )
+                        .foregroundStyle(
+                            textSecondary.opacity(0.7)
+                        )
+
+                    } else {
+
+                        Text("\(level)")
+                            .font(
+                                .system(
+                                    size: 28,
+                                    weight: .bold
+                                )
+                            )
+                            .foregroundStyle(textPrimary)
+                    }
+                }
+
+                // MARK: Station Labels
+
+                VStack(spacing: 3) {
+
+                    Text("المستوى \(level)")
+                        .font(
+                            .system(
+                                size: 12,
+                                weight: .bold
+                            )
+                        )
+                        .foregroundStyle(textPrimary)
+
+                    if current {
+
+                        Text("أنت هنا")
+                            .font(
+                                .system(
+                                    size: 10,
+                                    weight: .semibold
+                                )
+                            )
+                            .foregroundStyle(textPrimary)
+                            .padding(
+                                .horizontal,
+                                10
+                            )
+                            .padding(
+                                .vertical,
+                                4
+                            )
+                            .background(
+                                Capsule()
+                                    .fill(accent)
+                            )
+
+                    } else if completed {
+
+                        Text("مكتمل")
+                            .font(
+                                .system(size: 10)
+                            )
+                            .foregroundStyle(textSecondary)
+                    }
+                }
+            }
+            .frame(
+                width: 112,
+                height: 120
             )
-            .position(
-                x: x,
-                y: y
-            )
-    }
-
-    // MARK: - Bottom Decorations
-
-    private var bottomDecorations: some View {
-
-        ZStack(alignment: .topLeading) {
-
-            // Left Purple Shape
-
-            Ellipse()
-                .fill(
-                    Color(
-                        red: 0.51,
-                        green: 0.39,
-                        blue: 0.78
-                    )
-                )
-                .frame(
-                    width: 230,
-                    height: 310
-                )
-                .rotationEffect(.degrees(-25))
-                .position(
-                    x: -65,
-                    y: 795
-                )
-
-            // Right Blue Shape
-
-            Ellipse()
-                .fill(
-                    Color(
-                        red: 0.23,
-                        green: 0.28,
-                        blue: 0.66
-                    )
-                )
-                .frame(
-                    width: 290,
-                    height: 320
-                )
-                .rotationEffect(.degrees(30))
-                .position(
-                    x: 465,
-                    y: 785
-                )
-
-            // Right Purple Shadow
-
-            Ellipse()
-                .fill(
-                    Color(
-                        red: 0.40,
-                        green: 0.35,
-                        blue: 0.76
-                    )
-                    .opacity(0.65)
-                )
-                .frame(
-                    width: 225,
-                    height: 165
-                )
-                .rotationEffect(.degrees(-20))
-                .position(
-                    x: 445,
-                    y: 830
-                )
         }
-        .frame(
-            width: designWidth,
-            height: designHeight
-        )
+        .buttonStyle(.plain)
+        .disabled(locked)
     }
 }
 
